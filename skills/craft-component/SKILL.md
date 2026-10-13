@@ -26,7 +26,7 @@ Two failure modes, and the first is worse:
 
 ## Hard Rules
 
-1. **Plan before code, agree before build.** Every step below ends at a gate. Stop there, show the work, wait for the go. Offer options with one recommendation; apply only what was agreed, one round at a time.
+1. **Plan before code, agree before build.** Every step below ends at a gate. Stop there, show the work, wait for the go. Anything with more than one defensible answer goes to the owner as options with one recommendation. Anything with one right answer you apply and list, so the owner never has to pick between a bug and a fix.
 2. **Every default has a written reason.** Colour, size, duration, radius, copy. Your defaults and their reasons go in `DESIGN.md`, next to the value, so an audit can argue with exact numbers instead of impressions. No reason, no ship.
 3. **Done means seen.** Nothing is done until you have looked at it: light, dark, and 375px wide. Screenshots, not assumptions.
 4. **Prove the tests bite.** After each module, inject a user-visible bug and confirm a test fails. A suite that has never gone red proves nothing.
@@ -79,33 +79,35 @@ For each milestone: explain what you're building and why before you start, build
 
 ### 5. Playground
 
-Wire up the real component inside a fake host: every scenario, a control for every variant and theme, an event log that shows what the host would receive. Keep a headless screenshot script that takes a scenario name and a list of steps (click, key, type, wait), so your own checks are one command.
+Wire up the real component inside a fake host: every scenario, a control for every variant and theme, an event log that shows what the host would receive. Keep a headless screenshot script that takes a scenario name and a list of steps (click, key, type, wait), so your own checks are one command. Check every scenario yourself at light, dark and 375px before going on.
 
-Then hand it over. The owner tries it and judges the visuals; you don't. Ask for what felt off, and treat that as the brief for the next round.
-
-**Gate:** the owner has tried every scenario and given feedback.
+No gate yet. The owner doesn't see the playground until it has been audited.
 
 ### 6. Audit with external skills
 
-One skill at a time, read-only first. Present findings with exact values (the current value, the proposed one, why), and what you turned down and why. The owner picks. Then apply, test, update `DESIGN.md`, and log the decisions. Re-run an audit after any change to the part it covered.
+Run each skill against the playground, one at a time, read-only first. For every finding record the current value, the proposed one and why. Apply the clear-cut ones (a contrast failure, a missing focus ring, an exit with the wrong easing) and keep the list. Hold anything with more than one defensible answer for the owner. Update `DESIGN.md` as you go, and re-run an audit after any change to the part it covered.
 
 | Order | Skill | Catches |
 | --- | --- | --- |
-| 1 | [break-ui](https://github.com/emilkowalski/skills/blob/main/skills/break-ui/SKILL.md) | Worst-case content: the longest label the schema allows, one-letter labels, nine options, zero options, non-Latin scripts, RTL, 320px, 200% zoom, forced colours. Keep its page as the regression test |
-| 2 | [find-animation-opportunities](https://github.com/emilkowalski/skills/blob/main/skills/find-animation-opportunities/SKILL.md), then [animate](https://github.com/emilkowalski/skills/blob/main/skills/animate/SKILL.md) and [review-animations](https://github.com/emilkowalski/skills/blob/main/skills/review-animations/SKILL.md) | Moments that need motion, moments that must not, wrong easing, keyboard-paced animation |
-| 3 | [emil-design-eng](https://github.com/emilkowalski/skills/blob/main/skills/emil-design-eng/SKILL.md) | Hover and press feedback, perceived speed, the details nobody notices until they're wrong |
-| 4 | [better-interface](https://github.com/jakubkrehel/skills) (runs its domain reviews in parallel: accessibility, colour, layout, type, writing) | Focus lost on an action, silent failures, forced colours, contrast, copy that explains nothing |
-| 5 | [mobile-native](https://github.com/emilkowalski/skills/blob/main/skills/mobile-native/SKILL.md), if it will be used on a phone | Sticky hover, tap highlights, inputs that zoom the page, the viewport |
+| 1 | [break-ui](https://raw.githubusercontent.com/emilkowalski/skills/main/skills/break-ui/SKILL.md) | Worst-case content: the longest label the schema allows, one-letter labels, nine options, zero options, non-Latin scripts, RTL, 320px, 200% zoom, forced colours. Keep its page as the regression test |
+| 2 | [find-animation-opportunities](https://raw.githubusercontent.com/emilkowalski/skills/main/skills/find-animation-opportunities/SKILL.md), then [animate](https://raw.githubusercontent.com/emilkowalski/skills/main/skills/animate/SKILL.md) and [review-animations](https://raw.githubusercontent.com/emilkowalski/skills/main/skills/review-animations/SKILL.md) | Moments that need motion, moments that must not, wrong easing, keyboard-paced animation |
+| 3 | [emil-design-eng](https://raw.githubusercontent.com/emilkowalski/skills/main/skills/emil-design-eng/SKILL.md) | Hover and press feedback, perceived speed, the details nobody notices until they're wrong |
+| 4 | [better-interface](https://raw.githubusercontent.com/jakubkrehel/skills/main/skills/better-interface/SKILL.md) (runs its domain reviews in parallel: accessibility, colour, layout, type, writing) | Focus lost on an action, silent failures, forced colours, contrast, copy that explains nothing |
+| 5 | [mobile-native](https://raw.githubusercontent.com/emilkowalski/skills/main/skills/mobile-native/SKILL.md), if it will be used on a phone | Sticky hover, tap highlights, inputs that zoom the page, the viewport |
 
-If a skill isn't installed, read it from the link before auditing. If you can't, say so and run that audit from your own knowledge, under the same rule: exact values, owner picks.
+These are public files. If a skill isn't installed, fetch it from the link and follow it as written; its own references are linked from inside it. If you have no way to fetch, say so, and run that audit from your own knowledge under the same rule: exact values, clear-cut fixes applied, judgement calls held.
 
-Cap each round. Findings beyond the cap go into the next round, not the bin.
+### 7. Hand over
 
-### 7. Review and simplify
+Now the owner opens the playground. Give them three things together: the playground, the audit report (what each skill found, what you applied, what you turned down and why), and the short list of calls that are theirs. The owner tries every scenario and judges the look and feel; you don't. Their feedback is the brief for the next round.
+
+**Gate:** the owner has tried every scenario, made their calls, and given feedback.
+
+### 8. Review and simplify
 
 A code review with fresh eyes over everything that ships, frozen as a report before any fix. Then a simplify pass. Use the review and simplify skills your agent has. Simplify can undo a fix: run everything again, including the screenshots.
 
-### 8. Release
+### 9. Release
 
 Only on the owner's go, every time. Before asking: the package installs clean from a tarball, types resolve under strict module settings, the size guard holds, the README's first recipe works when pasted, the demo is deployed. Say what is still open (a manual screen-reader pass, a real phone) rather than pretending it isn't.
 
