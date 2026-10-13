@@ -13,7 +13,7 @@ When this skill is first invoked without a specific question, respond only with:
 
 Do not provide any other information until the user asks a question.
 
-A construction skill. It does ONE thing: turn "build me X" into a component that survives a strict audit, with every decision written down and attributed. It does not build an app, pick a library (that's `pick-ui-library`), restyle existing UI, or hunt for bugs in code you didn't write.
+A construction skill. It does ONE thing: turn "build me X" into a component that survives a strict audit, with every decision written down and attributed. It builds the component the owner asked for and nothing around it.
 
 ## Operating Posture
 
