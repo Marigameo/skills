@@ -1,0 +1,12 @@
+{
+  "name": "marigameo-skills",
+  "description": "Skills for crafting UI components carefully with coding agents, and for using agent-clarifier.",
+  "owner": { "name": "Mari (Mariappan Subramanian)" },
+  "plugins": [
+    {
+      "name": "mari-skills",
+      "source": ".",
+      "description": "craft-component and ask-clarifier."
+    }
+  ]
+}
