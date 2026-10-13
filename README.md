@@ -2,7 +2,7 @@
 
 Two skills, for designers and engineers who build UI with coding agents and don't want slop.
 
-I'm Mari, a design engineer. These skills come from building [agent-clarifier](https://github.com/marigameo/agent-clarifier), a clarifying-questions card for chat agents, with Claude Code as a pair: every decision planned first, built in reviewable pieces, judged on screen, stressed, audited, and logged. The process worked, so it's packaged here to reuse.
+I'm Mari, a design engineer. What's in here is what I picked up at work and from the design engineers who keep sharing their craft on X and the web, tested by building [agent-clarifier](https://github.com/marigameo/agent-clarifier), a clarifying-questions card for chat agents, with Claude Code as a pair: every decision planned first, built in reviewable pieces, judged on screen, stressed, audited, and logged. The process worked, so it's packaged here to reuse.
 
 ## Install
 
@@ -27,14 +27,14 @@ These skills put the decisions back in front of the code: what the thing is, whi
 
 ## Skills
 
-- **[craft-component](./skills/craft-component/SKILL.md)**: build a UI component the careful way. Brief, spec, sketch, milestones with tests that are proven to bite, a playground, a break page, audits with external skills, review, simplify, release on a go. Plus the taste rules that keep a competent build from being slop.
+- **[craft-component](./skills/craft-component/SKILL.md)**: build a UI component the careful way. Brief, plan, sketch, milestones with tests that are proven to bite, a playground the owner tries, audits with external skills, review, simplify, release on a go. Its taste section holds only what those skills don't cover, and it grows as I learn.
 - **[ask-clarifier](./skills/ask-clarifier/SKILL.md)**: how to use agent-clarifier. Setup, placement, which question type for what, writing good questions, the tool definition that tells your model when to ask, theming, troubleshooting.
 
-They pair well with [Emil Kowalski's skills](https://github.com/emilkowalski/skills); `craft-component` calls `animate`, `review-animations` and `break-ui` by name during its audit step.
+`craft-component` leans on [Emil Kowalski's skills](https://github.com/emilkowalski/skills) and [Jakub Krehel's](https://github.com/jakubkrehel/skills) for its audit step, by name and link. Install those too.
 
 ## Story mode
 
-`craft-component` has an optional story mode, off by default. When it's on, every review round is snapshotted into `process/NN-name/`: the plan as it was, the renders, the audit report before any fix. Snapshots are never edited.
+`craft-component` has an optional story mode, off by default. When it's on, the build keeps a `JOURNAL.md` with one entry per round, and every round is snapshotted into `process/NN-name/`: the plan as it was, the renders, the audit report before any fix. Snapshots are never edited.
 
 I turn it on when a build is also going to be written up. The folder becomes the source for the story: how the problem was approached, what was tried and turned down, and what the effort actually was. A separate skill drafts the portfolio piece and the posts from it. For a component that only needs to exist, leave it off; the journal is enough.
 
