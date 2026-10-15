@@ -1,6 +1,6 @@
 ---
 name: craft-component
-description: Build a UI component the careful way — agree what it is before any code, build in reviewable milestones with tests that are proven to bite, hand the owner a playground to try it in, audit it with external skills one at a time, review, simplify, then ship only on a go. Use when asked to build, craft, design or "do properly" a component, widget, card or any self-contained piece of UI. For motion use animate; for worst-case data use break-ui; for a whole app or page this is the wrong skill.
+description: Build a UI component the careful way — agree what it is before any code, build in reviewable milestones with tests that are proven to bite, hand the owner a playground to try it in until they freeze it, then audit the frozen version with external skills one at a time, review, simplify, and ship only on a go. Use when asked to build, craft, design or "do properly" a component, widget, card or any self-contained piece of UI. For motion use animate; for worst-case data use break-ui; for a whole app or page this is the wrong skill.
 ---
 
 # Crafting A Component
@@ -26,7 +26,7 @@ Two failure modes, and the first is worse:
 
 ## Hard Rules
 
-1. **Plan before code, agree before build.** Every step below ends at a gate. Stop there, show the work, wait for the go. Anything with more than one defensible answer goes to the owner as options with one recommendation. Anything with one right answer you apply and list, so the owner never has to pick between a bug and a fix.
+1. **Plan before code, agree before build.** Every step below ends at a gate. Stop there, show the work, wait for the go. Anything with more than one defensible answer goes to the owner as options with one recommendation. Anything with one right answer you apply and list, so the owner never has to pick between a bug and a fix. "Go with your recommendations" answers the calls on the table, not the gates after them. The owner can hand you a gate only by naming it, and never the sketch or the playground: those are where the owner judges the look and feel.
 2. **Every default has a written reason.** Colour, size, duration, radius, copy. Your defaults and their reasons go in `DESIGN.md`, next to the value, so an audit can argue with exact numbers instead of impressions. No reason, no ship.
 3. **Done means seen.** Nothing is done until you have looked at it: light, dark, and 375px wide. Screenshots, not assumptions.
 4. **Prove the tests bite.** After each module, inject a user-visible bug and confirm a test fails. A suite that has never gone red proves nothing.
@@ -61,7 +61,7 @@ The two gates are the point. Nobody writes the how while the what is still movin
 
 One throwaway HTML page with the main states side by side, in light and dark. It decides direction only: shape, density, where things sit. Don't polish it. Once the real component renders, stop judging the sketch.
 
-**Gate:** the owner picks a direction.
+**Gate:** the owner picks a direction. Never pick it for them: show the directions, recommend one, and stop.
 
 ### 4. Build in milestones
 
@@ -79,13 +79,17 @@ For each milestone: explain what you're building and why before you start, build
 
 ### 5. Playground
 
-Wire up the real component inside a fake host: every scenario, a control for every variant and theme, an event log that shows what the host would receive. Keep a headless screenshot script that takes a scenario name and a list of steps (click, key, type, wait), so your own checks are one command. Check every scenario yourself at light, dark and 375px before going on.
+Wire up the real component inside a fake host: every scenario, a control for every variant and theme, an event log that shows what the host would receive. Keep a headless screenshot script that takes a scenario name and a list of steps (click, key, type, wait), so your own checks are one command. Check every scenario yourself at light, dark and 375px before you show it, and fix what's plainly broken. That's your check, not an audit.
 
-No gate yet. The owner doesn't see the playground until it has been audited.
+Then hand it to the owner straight away: the playground, what to try in it (every scenario, and the moments to feel rather than read), and the short list of calls that are theirs. The owner tries every scenario and judges the look and feel; you don't. Their feedback is the brief for the next round: apply it, show it again, repeat.
+
+**Gate:** the owner says the playground is frozen. The look, the feel, the copy and the behaviour are settled, and they're happy with it. Freeze a copy of the plan and renders. Nothing after this changes how it looks or behaves without the owner.
 
 ### 6. Audit with external skills
 
-Run each skill against the playground, one at a time, read-only first. For every finding record the current value, the proposed one and why. Apply the clear-cut ones (a contrast failure, a missing focus ring, an exit with the wrong easing) and keep the list. Hold anything with more than one defensible answer for the owner. Update `DESIGN.md` as you go, and re-run an audit after any change to the part it covered.
+Only once the playground is frozen, so the audits judge what will ship and nothing has to be audited twice. The audits make it smoother: they catch what a person trying it misses (worst-case data, keyboard, screen readers, contrast, forced colours, motion budgets). They don't redesign it.
+
+Run each skill against the frozen playground, one at a time, read-only first. For every finding record the current value, the proposed one and why. Freeze the report before any fix. Apply the clear-cut ones (a contrast failure, a missing focus ring, an exit with the wrong easing) and keep the list. Hold anything with more than one defensible answer for the owner, and anything that would change what they froze (a different look, motion or wording). Update `DESIGN.md` as you go, and re-run an audit after any change to the part it covered.
 
 | Order | Skill | Catches |
 | --- | --- | --- |
@@ -97,17 +101,15 @@ Run each skill against the playground, one at a time, read-only first. For every
 
 These are public files. If a skill isn't installed, fetch it from the link and follow it as written; its own references are linked from inside it. If you have no way to fetch, say so, and run that audit from your own knowledge under the same rule: exact values, clear-cut fixes applied, judgement calls held.
 
-### 7. Hand over
+When the audits are done, give the owner the audit report (what each skill found, what you applied, what you turned down and why) and the held calls. They check the applied fixes in the playground: smoother, not different.
 
-Now the owner opens the playground. Give them three things together: the playground, the audit report (what each skill found, what you applied, what you turned down and why), and the short list of calls that are theirs. The owner tries every scenario and judges the look and feel; you don't. Their feedback is the brief for the next round.
+**Gate:** the owner has made the held calls and agrees nothing they froze has changed.
 
-**Gate:** the owner has tried every scenario, made their calls, and given feedback.
-
-### 8. Review and simplify
+### 7. Review and simplify
 
 A code review with fresh eyes over everything that ships, frozen as a report before any fix. Then a simplify pass. Use the review and simplify skills your agent has. Simplify can undo a fix: run everything again, including the screenshots.
 
-### 9. Release
+### 8. Release
 
 Only on the owner's go, every time. Before asking: the package installs clean from a tarball, types resolve under strict module settings, the size guard holds, the README's first recipe works when pasted, the demo is deployed. Say what is still open (a manual screen-reader pass, a real phone) rather than pretending it isn't.
 
