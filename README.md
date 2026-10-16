@@ -27,7 +27,7 @@ These skills put the decisions back in front of the code: what the thing is, whi
 
 ## Skills
 
-- **[craft-component](./skills/craft-component/SKILL.md)**: build a UI component the careful way. Brief, plan, sketch, milestones with tests that are proven to bite, a playground the owner tries and gives feedback on until they freeze it, then audits of the frozen version with external skills, review, simplify, release on a go. Its taste section holds only what those skills don't cover, and it grows as I learn.
+- **[craft-component](./skills/craft-component/SKILL.md)**: build a UI component the careful way. Brief, plan, sketch, milestones with tests that are proven to bite, a plain playground and a story demo the owner tries and gives feedback on until they freeze them, a slop check before every hand-over, then audits of the frozen version with external skills, review, simplify, release on a go. Its taste section holds only what those skills don't cover, and it grows as I learn.
 - **[ask-clarifier](./skills/ask-clarifier/SKILL.md)**: how to use agent-clarifier. Setup, placement, which question type for what, writing good questions, the tool definition that tells your model when to ask, theming, troubleshooting.
 
 `craft-component` leans on [Emil Kowalski's skills](https://github.com/emilkowalski/skills) and [Jakub Krehel's](https://github.com/jakubkrehel/skills) for its audit step, by name and link. Install those too.
