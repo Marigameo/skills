@@ -1,6 +1,6 @@
 # Skills for crafting components with coding agents
 
-Two skills, for designers and engineers who build UI with coding agents and don't want slop.
+Three skills, for designers and engineers who build UI with coding agents and don't want slop.
 
 I'm Mari, a design engineer. What's in here is what I picked up at work and from the design engineers who keep sharing their craft on X and the web, tested by building [agent-clarifier](https://github.com/marigameo/agent-clarifier), a clarifying-questions card for chat agents, with Claude Code as a pair: every decision planned first, built in reviewable pieces, judged on screen, stressed, audited, and logged. The process worked, so it's packaged here to reuse.
 
@@ -29,6 +29,7 @@ These skills put the decisions back in front of the code: what the thing is, whi
 
 - **[craft-component](./skills/craft-component/SKILL.md)**: build a UI component the careful way. Brief, plan, sketch, milestones with tests that are proven to bite, a plain playground and a story demo the owner tries and gives feedback on until they freeze them, a slop check before every hand-over, then audits of the frozen version with external skills, review, simplify, release on a go. Its taste section holds only what those skills don't cover, and it grows as I learn.
 - **[ask-clarifier](./skills/ask-clarifier/SKILL.md)**: how to use agent-clarifier. Setup, placement, which question type for what, writing good questions, the tool definition that tells your model when to ask, theming, troubleshooting.
+- **[show-co-presence](./skills/show-co-presence/SKILL.md)**: how to use [co-presence](https://github.com/marigameo/co-presence). When it earns its place and when to leave it out, strip or card, feeding it a snapshot and events, mapping Claude Agent SDK hooks onto it, the `set_activity` tool that lets your model say what it's doing, writing labels, theming, troubleshooting.
 
 `craft-component` leans on [Emil Kowalski's skills](https://github.com/emilkowalski/skills) and [Jakub Krehel's](https://github.com/jakubkrehel/skills) for its audit step, by name and link. Install those too.
 
