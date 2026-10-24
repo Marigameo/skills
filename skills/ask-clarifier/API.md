@@ -1,6 +1,6 @@
 # agent-clarifier API
 
-Exact names and defaults for `@marigameo/agent-clarifier` 0.1.x. The guide is [SKILL.md](SKILL.md).
+Exact names and defaults for `@marigameo/agent-clarifier` 0.2.x. The guide is [SKILL.md](SKILL.md).
 
 ## Questionnaire
 
@@ -115,7 +115,7 @@ All bubble, are `composed`, and are typed on `HTMLElementEventMap`.
 | `--clarify-border` | `#e6e6e6` / `#343434` | Card edge, dividers |
 | `--clarify-hover`, `--clarify-selected` | `#f5f5f5`, `#ececec` / `#292929`, `#303030` | Row fills |
 | `--clarify-key-bg` | `#f0f0f0` / `#2c2c2c` | Number-key badges |
-| `--clarify-accent`, `-accent-fg`, `-accent-soft` | `#3b5bdb` / `#8ea6ff` | Picks, focus, links. `-accent-soft` must be opaque |
+| `--clarify-accent`, `-accent-fg`, `-accent-soft` | `--clarify-fg`, `--clarify-bg` (ink) | Picks, links, and focus. Unset, focus is a grey ring (`#767676` / `#8f8f8f`). `-accent-soft` must be opaque |
 | `--clarify-danger`, `-danger-soft` | `#c2410c` / `#f0895a` | Errors |
 | `--clarify-success` | `#2f7d4f` / `#7cc79a` | The answered tick |
 | `--clarify-radius`, `--clarify-radius-sm` | `16px`, `8px` | Card, rows |

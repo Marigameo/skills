@@ -157,9 +157,9 @@ To send the answers yourself (your own transport, with a failure state): prevent
 
 Climb only as far as the change needs:
 
-1. **Nothing.** The defaults are neutral greys that sit under any brand.
+1. **Nothing.** The defaults are neutral and monochrome: picks share the primary button's ink, focus is a grey ring. They sit under any brand.
 2. **Tokens.** `--clarify-accent`, `--clarify-radius`, `--clarify-font` on the element or `:root`. Accent, danger and success each need a light **and** a dark value that pass 4.5:1 on the card; the soft fills derive from them.
-3. **Parts.** `::part(card)`, `::part(option)`, `::part(button-primary)` and the rest, for structure. Leave the Recommended badge grey: the user's pick is meant to be the loudest thing on the card.
+3. **Parts.** `::part(card)`, `::part(option)`, `::part(button-primary)` and the rest, for structure. Leave the Recommended badge grey: the user's pick is meant to be the loudest thing on the card. If you set an accent, give `::part(button-primary)` the same colour so the card keeps one.
 
 Dark mode follows `prefers-color-scheme`; force it with `theme="dark|light"`.
 
