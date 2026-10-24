@@ -63,7 +63,7 @@ A `label` replaces the default words for editing, commenting, working and viewin
 | `goal` | `goal: Partial<Goal> \| null` | Merges into the goal; `null` removes it (the card becomes a strip) |
 | `join` | `actor` | Adds an actor. An id already there is updated instead |
 | `leave` | `id` | Removes one. An unknown id is ignored |
-| `activity` | `id`, `activity \| null` | Replaces that actor's activity; `null` makes them idle |
+| `activity` | `id`, `activity \| null` | Replaces that actor's activity; `null` makes them idle. For an id not joined yet: held until its join when it has `at`, ignored without |
 | `update` | `id`, `actor: Partial<{ kind, name, avatar, parentId }>` | Changes who they are, not what they do |
 
 Every event takes `at` (epoch ms). An event older than the last one applied to the same actor (or to the goal) is dropped. Without `at`, events apply in arrival order. A snapshot with `at` keeps what changed after it was taken; one without `at` replaces everything. `el.data = …` is a snapshot without `at`.
@@ -140,7 +140,7 @@ No `::part()`s: the structure is not part of the API.
 
 | | |
 | --- | --- |
-| React 19 | `<co-presence data={d} max={5} selectable oncopresence-select={(e) => …} />`; `import '@marigameo/co-presence/react'` once for the JSX types (empty at runtime). Objects are set as properties |
+| React 19 | `<co-presence data={d} max={5} selectable oncopresence-select={(e) => …} />`; `import '@marigameo/co-presence/react'` once for the JSX types (empty at runtime). Objects are set as properties, so `d` must keep its identity (a constant or `useMemo`): a new object is a new snapshot. Ref type: `CoPresence` |
 | Vue 3 | `isCustomElement: (t) => t === 'co-presence'`, then `:data="d"` (or `.data`) and `@copresence-select` |
 | Svelte 5 | `<co-presence data={d} oncopresence-select={…} />` |
 | Angular | `CUSTOM_ELEMENTS_SCHEMA`; bind `[data]` as a property |

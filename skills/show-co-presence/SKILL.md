@@ -7,11 +7,11 @@ description: Guide to co-presence, the web component that shows who is working o
 
 ## Initial Response
 
-When this skill is first invoked without a task or question, respond only with:
+When this skill is invoked on its own, with no question or task, respond only with:
 
 > I'm ready to put co-presence in your product and help your agents say what they're doing, my knowledge comes from its author, Mari.
 
-Do not provide any other information until the user asks a question.
+Do not provide any other information until the user asks a question. When it comes with a task ("add it to my app", "why is the agent showing twice"), skip this and do the task.
 
 A guide skill for [co-presence](https://github.com/marigameo/co-presence) (`@marigameo/co-presence`), a zero-dependency web component that shows who is working on one goal, people and agents together, what each of them is doing right now, and anything waiting on the person looking at it. Answer from this file first. The exact data shape, events, labels, tokens and warning codes are in [API.md](API.md); read it when you need a precise name or default.
 
@@ -49,6 +49,11 @@ import '@marigameo/co-presence'; // defines <co-presence>
 
 Importing on a server (Astro, Next, Nuxt) is safe. From a CDN, pin the version. React 19: `import '@marigameo/co-presence/react'` once for the JSX types.
 
+React traps:
+
+- **`data` must keep its identity.** React sets it again whenever the object changes, and every set is a snapshot without `at` that replaces everything. Pass a constant or a memoised object for the first snapshot, and send everything after it through `apply()`. Never `data={{ … }}` inline.
+- **The ref type is `CoPresence`:** `useRef<CoPresence>(null)`, with `import type { CoPresence } from '@marigameo/co-presence'`.
+
 ```html
 <co-presence selectable></co-presence>
 ```
@@ -62,11 +67,14 @@ el.apply({ type: 'join', actor: { id: 'logs', kind: 'agent', name: 'Logs agent',
 el.apply({ type: 'activity', id: 'logs', activity: { type: 'waiting', waitingOn: 'me', label: 'Okay to restart the pool?' } });
 ```
 
-Three rules for the feed:
+Four rules for the feed:
 
 1. **Ids are stable.** Every update keys on `id`. A new id per run makes a new face.
 2. **Send `at` (epoch ms) on every event.** An event older than the last one for that actor is dropped, so a late "editing" can't bring back an agent that left. Without `at`, events apply in arrival order.
 3. **Subscribe, then fetch.** Open the event stream first, then apply the snapshot as `{ type: 'snapshot', data, at }` with the time it was taken: anything newer that already arrived stays. `el.data = …` is a snapshot without `at` and replaces everything.
+4. **A snapshot is everyone.** Whoever isn't in it leaves. When the server knows the people but the agents run in your own loop (in this tab, say), build each snapshot from both: the server's people plus the agents still running. Otherwise a refetch after a reconnect removes every running agent.
+
+An `activity` for an id that hasn't joined yet is held until its join, when it has `at` (the network reordered them). If your feed's events don't carry names, send `join` with the name you know before the first activity.
 
 ## Strip or card
 
@@ -76,6 +84,10 @@ Three rules for the feed:
 | Box | None: no border, no fill | A rounded card |
 | Collapse | No button. Set `collapsed` yourself, and give people your own control if they should choose | Its own chevron; fires `copresence-toggle` |
 | Put it | By a chat's message box, or in a header | On top of the artifact panel the swarm is working on |
+
+Pick by what the goal is. A run or an incident (people and agents on the whole thing, much of it away from any one document) is a strip in the header. Work on one artifact is a card on top of that artifact's panel.
+
+**It has no width of its own.** The element is a size container (`container-type: inline-size`), so it takes its width from its parent. In a flex row, like most headers, give it `flex: 1 1 240px` or a width; left to itself it collapses to 0 and its faces spill past the edge.
 
 Send `{ type: 'goal', goal: null }` to drop the goal and turn a card back into a strip.
 
@@ -94,17 +106,18 @@ The `type` carries the meaning (colour, order, announcement, default words); the
 | The actor is | Send | Shows |
 | --- | --- | --- |
 | Stuck until a person acts | `waiting` + `waitingOn: <their id>` | "Needs you" (when it's `selfId`) or "Waiting on Priya", amber, announced |
-| Stopped by an error it won't recover from | `failed` + the reason as `label` | Red, a square mark, announced |
+| Stopped by an error it won't recover from | `failed` + the reason as `label`, and no `leave` | Red, a square mark, announced. It stays until the user acts on it (Retry or dismiss from `copresence-select`) or the next run joins it again; then send `leave` or the new activity |
 | Changing the artifact | `editing` + `target` | "Editing §2 Pricing", green |
 | Adding a comment | `commenting` + `target` | "Commenting on §2 Pricing", green |
 | Busy away from the artifact: thinking, searching, running tools | `working` + `label` | "Searching the logs", green |
-| Only looking | `viewing` | "Viewing" (person), "Reading" (agent), no mark |
-| Finished, about to leave | `done`, then `leave` | "Done", no mark |
+| Only looking, or just opened the page | `viewing` | "Viewing" (person), "Reading" (agent), no mark |
+| Finished, about to leave | `done`, then `leave` | "Done", no mark. Send `leave` right away: "Done" is seen only while the face is still on screen, so a long-running agent often leaves without it being read. That's fine |
 | Here, doing nothing | `activity: null` | "Idle", a grey face |
 
 Writing labels:
 
 - **2 to 5 words, starting with a verb**, in the user's terms: "Searching payments-api logs", "Drafting the status update". Never a tool or function name ("grep_tool", "Bash").
+- **A waiting label is the question, cut to fit**: "Okay to restart the pool?", not the full sentence the person is reading.
 - **Don't repeat the name or the type.** The name is already beside it; "Logs agent is working on searching" says it three times.
 - **`target` is the part as the user sees it**: "§2 Pricing", "Mitigation", not an id or a path.
 - **Amber only when it's true.** Send `waiting` when the question is actually on screen, and replace it the moment it's answered. A stale "Needs you" teaches people to ignore it.
@@ -130,6 +143,7 @@ The hooks run on your server, so `send()` is your own transport (SSE, WebSocket)
 import { query } from '@anthropic-ai/claude-agent-sdk';
 
 const MAIN = 'main'; // the main agent's actor id, joined with the snapshot
+const latest = new Map(); // actor id → the last activity sent; have send() record it
 const LABELS = { Read: 'Reading files', Grep: 'Searching the code', Glob: 'Finding files', Edit: 'Editing files', Write: 'Writing a file', Bash: 'Running a command', WebSearch: 'Searching the web', WebFetch: 'Reading a page' };
 const on = (fn) => [{ hooks: [async (input) => { fn(input); return {}; }] }];
 
@@ -147,11 +161,13 @@ const run = query({
     // A permission prompt is a person being waited on.
     canUseTool: async (toolName, input, { agentID }) => {
       const id = agentID ?? MAIN;
+      const before = latest.get(id);
       send({ type: 'activity', id, at: Date.now(), activity: { type: 'waiting', waitingOn: selfId, label: `Okay to use ${toolName}?` } });
       // Your approval UI (or agent-clarifier for AskUserQuestion). It resolves to
       // { behavior: 'allow', updatedInput: input } or { behavior: 'deny', message }.
       const result = await askThePerson(toolName, input);
-      send({ type: 'activity', id, at: Date.now(), activity: { type: 'working', startedAt: Date.now() } });
+      // Back to what it was doing, so the line doesn't fall to a bare "Working".
+      send({ type: 'activity', id, at: Date.now(), activity: before ?? { type: 'working', startedAt: Date.now() } });
       return result;
     },
   },
@@ -183,7 +199,7 @@ Its description carries the "when", so the model doesn't need a prompt paragraph
 }
 ```
 
-The tool input is already an `Activity`. Send it as `{ type: 'activity', id: <the agent that called it>, at: Date.now(), activity: { ...input, startedAt: Date.now() } }` and return a short tool result such as `"ok"`. The model can only fill `waitingOn` with ids it knows, so list the people in the system prompt ("People on this task: me (Mari S), aisha (Aisha Khan)").
+The tool input is already an `Activity`. Send it as `{ type: 'activity', id: <the agent that called it>, at: Date.now(), activity: { ...input, startedAt: Date.now() } }` and return a short tool result such as `"ok"`. If your UI lists the agent's tool calls, leave `set_activity` out: the strip already says it, and "Used set_activity" means nothing to the user. The model can only fill `waitingOn` with ids it knows, so list the people in the system prompt ("People on this task: me (Mari S), aisha (Aisha Khan)").
 
 One line for the system prompt, if you want the behaviour even without the tool, or as a reminder with it:
 
@@ -191,7 +207,7 @@ One line for the system prompt, if you want the behaviour even without the tool,
 
 ### Pairing with agent-clarifier
 
-When an agent asks through [agent-clarifier](https://github.com/marigameo/agent-clarifier), the host knows exactly when the question is open, so it sets the amber itself:
+When an agent asks through [agent-clarifier](https://github.com/marigameo/agent-clarifier), the host knows exactly when the question is open, so it sets the amber itself, then sends what the agent does next (or what it was doing before it asked):
 
 ```js
 el.apply({ type: 'activity', id: 'planner', at: Date.now(), activity: { type: 'waiting', waitingOn: 'me', label: 'Which region first?' } });
@@ -203,7 +219,7 @@ el.apply({ type: 'activity', id: 'planner', at: Date.now(), activity: { type: 'w
 
 | Event or property | Do |
 | --- | --- |
-| `copresence-select` (with `selectable`) | Follow that actor: scroll to its step in the thread, highlight its `target`, offer Retry for a failed one |
+| `copresence-select` (with `selectable`) | Follow that actor: scroll to its step in the thread, highlight its `target`. For a failed one, offer Retry and Dismiss; Dismiss sends its `leave` |
 | `copresence-toggle` (card) | Remember the choice, and set `collapsed` back on the next visit |
 | `copresence-roster` | Optional: pause your own hover cards while the roster is open |
 | `connection` | Set `connecting` or `offline` while your feed is down. It says "Reconnecting…" in words, so a stale "Editing" never looks live. Set `live` and send a fresh snapshot (with `at`) when it's back |
@@ -228,6 +244,9 @@ Transparent avatars sit on a neutral fill. A dark logo on a transparent backgrou
 
 | Symptom | Cause → fix |
 | --- | --- |
+| The strip is invisible, or its faces run past the edge | It's 0 wide: a size container in a flex row gets no width. Give it `flex: 1 1 240px` or a width |
+| Running agents vanish after a reconnect | The refetched snapshot held only the server's people. Add the agents your loop is still running |
+| React: everyone resets whenever the component re-renders | `data` got a new object each render, and each one is a snapshot. Keep it constant and use `apply()` |
 | Every face has a white or dark halo | `--copresence-surface` doesn't match what's behind the element. Set it to that colour |
 | An agent that left came back | A late event without `at`. Send `at` on every event |
 | A refetched snapshot undid newer changes | It was applied without `at`, or with `el.data = …`. Apply `{ type: 'snapshot', data, at }` with the time it was taken |
