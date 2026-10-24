@@ -87,7 +87,7 @@ An `activity` for an id that hasn't joined yet is held until its join, when it h
 
 Pick by what the goal is. A run or an incident (people and agents on the whole thing, much of it away from any one document) is a strip in the header. Work on one artifact is a card on top of that artifact's panel.
 
-**It has no width of its own.** The element is a size container (`container-type: inline-size`), so it takes its width from its parent. In a flex row, like most headers, give it `flex: 1 1 240px` or a width; left to itself it collapses to 0 and its faces spill past the edge.
+**It has no width of its own.** The element is a size container (`container-type: inline-size`), so it takes its width from its parent. In a flex row, like most headers, give it `flex: 1 1 240px` or a width. Left to itself it sits at its floor, about 264px, in the narrow layout (the line on its own row under the faces); in 0.1.1 and earlier it has no floor and collapses to 0, its faces spilling past the edge.
 
 Send `{ type: 'goal', goal: null }` to drop the goal and turn a card back into a strip.
 
@@ -244,7 +244,8 @@ Transparent avatars sit on a neutral fill. A dark logo on a transparent backgrou
 
 | Symptom | Cause → fix |
 | --- | --- |
-| The strip is invisible, or its faces run past the edge | It's 0 wide: a size container in a flex row gets no width. Give it `flex: 1 1 240px` or a width |
+| The strip is invisible, or its faces run past the edge | 0.1.1 and earlier: it's 0 wide, because a size container in a flex row gets no width. Update to 0.1.2, or give it `flex: 1 1 240px` or a width |
+| The strip sits narrow, with the line under the faces, though there's room | It's at its floor in a flex row. Give it `flex: 1 1 240px` or a width |
 | Running agents vanish after a reconnect | The refetched snapshot held only the server's people. Add the agents your loop is still running |
 | React: everyone resets whenever the component re-renders | `data` got a new object each render, and each one is a snapshot. Keep it constant and use `apply()` |
 | Every face has a white or dark halo | `--copresence-surface` doesn't match what's behind the element. Set it to that colour |
