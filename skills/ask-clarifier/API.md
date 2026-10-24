@@ -25,7 +25,7 @@ Exact names and defaults for `@marigameo/agent-clarifier` 0.2.x. The guide is [S
 | `delegate` | Show **Decide for me** instead of Skip |
 | `min` / `max` | Multi only. `min` defaults to 1 |
 | `default` | Option id(s), or the text of a text question |
-| option `compose` | Picking it starts this sentence in the composer |
+| option `compose` | Picking it starts this sentence in the composer. `single` only |
 
 ## Result
 

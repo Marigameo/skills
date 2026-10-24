@@ -7,11 +7,11 @@ description: Guide to agent-clarifier, the web component that lets a chat agent 
 
 ## Initial Response
 
-When this skill is first invoked without a specific question, respond only with:
+When this skill is invoked on its own, with no question or task, respond only with:
 
 > I'm ready to wire agent-clarifier into your chat and help your agent ask the right questions, my knowledge comes from its author, Mari.
 
-Do not provide any other information until the user asks a question.
+Do not provide any other information until the user asks a question. When it comes with a task ("wire it into my app", "why is the card not showing"), skip this and do the task.
 
 A guide skill for [agent-clarifier](https://github.com/marigameo/agent-clarifier) (`@marigameo/agent-clarifier`), a zero-dependency web component that lets a chat agent ask a few short questions before it acts, the way Claude's question card does. Answer from this file first. Exact attributes, events, tokens and the result shape are in [API.md](API.md); read it when you need a precise name or default.
 
@@ -47,6 +47,15 @@ In both, a message sent while the card waits **is the answer**. The element catc
 
 When docked, the composer's container gets `data-clarifier-docked`: square off its top corners so the two read as one surface.
 
+## React (and other frameworks that own the DOM)
+
+When the model drives the card through a tool, call `ask()` from the tool handler. The JSX `questionnaire` prop is for cards you render yourself.
+
+- **`container`:** an empty `<div>` just above the composer's `<form>`, one React never renders children into. Pass it by ref.
+- **`transcript`:** not the message list itself. `ask()` appends the record after React's own nodes, so later messages render above it. Render an empty `<div data-clarify-record={toolUse.id} />` where the tool call sits in the conversation and pass that. It has to be in the DOM before `ask()` runs: commit the message update with `flushSync`, then look the slot up.
+- **Send stays usable while the card waits.** Apps often disable Send while the agent is busy, which blocks the reply in the user's own words. Treat "waiting on the user" apart from "waiting on the model": Send on, no "Thinking…".
+- A controlled `<textarea>` works as the composer. Pass its ref as `composer`; the form's `onSubmit` never sees a reply meant for the card.
+
 ## Picking the question type
 
 | The user should | Use |
@@ -54,7 +63,7 @@ When docked, the composer's container gets `data-clarifier-docked`: square off i
 | Pick one | `single`, 2 to 6 options, the recommended one first with `recommended: true` |
 | Pick several | `multi`, with `max` when there's a limit. Continue never fires on its own, so Enter means "done" |
 | Give a short detail | `text`, with a `default` that prefills a sentence they edit in place |
-| Write it in their own words (personal, sensitive, or longer than a pick) | A `compose` option: `{ label: "I'll explain", compose: "For accessibility, I need " }` starts that sentence in the composer |
+| Write it in their own words (personal, sensitive, or longer than a pick) | A `compose` option on a `single` question: `{ label: "I'll explain", compose: "For accessibility, I need " }` starts that sentence in the composer. On `multi` it's dropped with a `compose-multi` warning |
 | Be able to say "you choose" | `delegate: true` on the question. "Decide for me" replaces Skip and comes back as `delegated` |
 | Not be able to skip | `required: true`. Required beats delegate |
 | Answer yes or no | A two-option `single`. There is no boolean type on purpose |
@@ -93,7 +102,7 @@ The tool. Its description carries the "when", so the model doesn't need a prompt
 ```json
 {
   "name": "ask_user",
-  "description": "Ask the user up to 4 short questions before acting. Use it only when the answer changes the result and a wrong guess would be costly to redo. Never ask for anything already in the conversation. Put the recommended option first and mark it. Use type single for one answer, multi (with max) when several can apply, text for a short detail. Add a compose option when the user should write the answer themselves. Set delegate when any sensible pick would do. After the result: for a skipped question, say what you assumed; for a delegated one, say what you chose; a message in the user's own words replaces the picks.",
+  "description": "Ask the user up to 4 short questions before acting. Use it only when the answer changes the result and a wrong guess would be costly to redo. Never ask for anything already in the conversation. Put the recommended option first and mark it. Use type single for one answer, multi (with max) when several can apply, text for a short detail. Add a compose option (single only) when the user should write the answer themselves. Set delegate when any sensible pick would do. After the result: for a skipped question, say what you assumed; for a delegated one, say what you chose; a message in the user's own words replaces the picks.",
   "input_schema": {
     "type": "object",
     "required": ["questions"],
@@ -112,6 +121,7 @@ The tool. Its description carries the "when", so the model doesn't need a prompt
             "type": { "type": "string", "enum": ["single", "multi", "text"] },
             "required": { "type": "boolean" },
             "delegate": { "type": "boolean", "description": "Offer 'Decide for me'." },
+            "other": { "type": "boolean", "description": "single and multi: false only when the options are truly exhaustive" },
             "max": { "type": "integer", "description": "multi only" },
             "default": { "type": "string", "description": "text only: a sentence to edit in place" },
             "options": {
@@ -124,7 +134,7 @@ The tool. Its description carries the "when", so the model doesn't need a prompt
                   "label": { "type": "string" },
                   "description": { "type": "string", "description": "The trade-off, one line." },
                   "recommended": { "type": "boolean" },
-                  "compose": { "type": "string", "description": "Picking this starts this sentence in the composer instead." }
+                  "compose": { "type": "string", "description": "single questions only. Picking this starts this sentence in the composer instead." }
                 }
               }
             }
@@ -136,7 +146,20 @@ The tool. Its description carries the "when", so the model doesn't need a prompt
 }
 ```
 
-The tool input is already a valid questionnaire: pass it straight to `ask()`. Give the result back to the model as the tool result, as `labels` per question plus `status`, and `message` when `delivery` is `composer`.
+The tool input is a questionnaire without its `id`. Use the tool call's id, which also ties the answers back to the call. Then hand the result back as the tool result:
+
+```js
+const result = await ask({ ...toolUse.input, id: toolUse.id }, { container, transcript, composer });
+const content = JSON.stringify({
+  status: result.status,
+  answers: Object.fromEntries(
+    Object.entries(result.answers).map(([id, a]) => [id, { status: a.status, labels: a.labels }]),
+  ),
+  ...(result.delivery === 'composer' && { message: result.message }),
+});
+```
+
+Keep each question's own `status`: it's how the model tells a skipped question from a delegated one. `labels` already include any "Something else" text, so `values` and `other` can stay out.
 
 One line for the system prompt, if you want the behaviour even without the tool:
 
@@ -148,8 +171,8 @@ One line for the system prompt, if you want the behaviour even without the tool:
 
 - **Skipped:** proceed on your best guess and say what you assumed.
 - **Delegated:** pick, and say what you chose.
-- **Composer reply:** the message is the answer; the picks made so far come with it.
-- **Edit answers later** arrives as `clarify:revise` on the element, not through the promise. Listen for it if the agent should hear about changes.
+- **Composer reply:** the message is the answer; the picks made so far come with it. The record only says the user replied, so show `message` in the chat as their own message too. Render it from the tool result rather than adding a user message to the conversation: the tool result has to follow the tool call directly.
+- **Edit answers later** arrives as `clarify:revise` on the element, not through the promise, which has already resolved. It bubbles, so one listener on the chat's root covers every record. "Answer the questions" on a composer-reply record fires it too. With `ask()`, the card moves itself back to the composer for the edit and back to the record after; don't prevent the event. Tell the model as a new user message ("I changed my answers: Budget: ₹10k to ₹25k"), held until the current turn ends if the agent is busy. A reply in the user's own words on a reopened card comes as `clarify:reply` the same way: send it as a new user message.
 
 To send the answers yourself (your own transport, with a failure state): prevent `clarify:submit`, then call `markAnswered()` or `setError(message)`, which keeps the answers and offers Try again.
 
