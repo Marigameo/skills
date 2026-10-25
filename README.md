@@ -1,6 +1,6 @@
 # Skills for crafting components with coding agents
 
-Three skills, for designers and engineers who build UI with coding agents and don't want slop.
+Four skills, for designers and engineers who build UI with coding agents and don't want slop.
 
 I'm Mari, a design engineer. What's in here is what I picked up at work and from the design engineers who keep sharing their craft on X and the web, tested by building [agent-clarifier](https://github.com/marigameo/agent-clarifier), a clarifying-questions card for chat agents, with Claude Code as a pair: every decision planned first, built in reviewable pieces, judged on screen, stressed, audited, and logged. The process worked, so it's packaged here to reuse.
 
@@ -30,6 +30,8 @@ These skills put the decisions back in front of the code: what the thing is, whi
 - **[craft-component](./skills/craft-component/SKILL.md)**: build a UI component the careful way. Brief, plan, sketch, milestones with tests that are proven to bite, a plain playground and a story demo the owner tries and gives feedback on until they freeze them, a slop check before every hand-over, then audits of the frozen version with external skills, review, simplify, release on a go. Its taste section holds only what those skills don't cover, and it grows as I learn.
 - **[ask-clarifier](./skills/ask-clarifier/SKILL.md)**: how to use agent-clarifier. Setup, placement, which question type for what, writing good questions, the tool definition that tells your model when to ask, theming, troubleshooting.
 - **[show-co-presence](./skills/show-co-presence/SKILL.md)**: how to use [co-presence](https://github.com/marigameo/co-presence). When it earns its place and when to leave it out, strip or card, feeding it a snapshot and events, mapping Claude Agent SDK hooks onto it, the `set_activity` tool that lets your model say what it's doing, writing labels, theming, troubleshooting.
+
+- **[draw-diagrams](./skills/draw-diagrams/SKILL.md)**: add diagrams to your own chat product, so the model draws a flow, a hand-off or a set of stages only when a picture explains better than prose, and users never see a broken one. A tool that decides when, guidance for the model, a server check on the real Mermaid parser, a renderer that hides failures, a considered light and dark theme, and an eval. Framework-neutral, with tested code to copy. It's built on what I learnt shipping a similar feature in [Strive AI's chat engine](https://mariappan.netlify.app/work/chat-diagrams/).
 
 `craft-component` leans on [Emil Kowalski's skills](https://github.com/emilkowalski/skills) and [Jakub Krehel's](https://github.com/jakubkrehel/skills) for its audit step, by name and link. Install those too.
 
