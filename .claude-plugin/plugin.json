@@ -1,10 +1,10 @@
 {
   "name": "mari-skills",
-  "description": "Skills for crafting UI components carefully with coding agents, for using agent-clarifier and co-presence, and for adding diagrams to a chat product.",
+  "description": "Skills for crafting UI components carefully with coding agents, for using agent-clarifier and co-presence, for adding diagrams to a chat product, and for fitting websites to iPhone Duo.",
   "version": "0.1.0",
   "author": { "name": "Mari (Mariappan Subramanian)" },
   "homepage": "https://github.com/marigameo/skills",
   "repository": "https://github.com/marigameo/skills",
   "license": "MIT",
-  "keywords": ["design-engineering", "ui", "components", "agent-clarifier", "co-presence", "diagrams", "mermaid", "chat"]
+  "keywords": ["design-engineering", "ui", "components", "agent-clarifier", "co-presence", "diagrams", "mermaid", "chat", "iphone-duo", "foldable", "responsive", "safari"]
 }

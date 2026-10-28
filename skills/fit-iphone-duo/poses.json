@@ -1,0 +1,20 @@
+{
+  "$comment": "iPhone Duo geometry for the web. Viewport widths and heights are WebKit's published Safari 27.1 numbers (https://webkit.org/blog/18486/webkit-features-for-safari-27-1/, 2026-10-23). Screen points are Apple's (466x678 outer; 951x669 inner, the App Store Connect screenshot size at 3x). Where Safari's chrome sits inside the screen is derived from the arithmetic and marked estimated: WebKit gives the viewport, not the chrome layout. The crease is at the centre of the inner screen (475.5pt); its y inside the open-portrait viewport depends on the top chrome and is estimated.",
+  "version": "0.1.0",
+  "collected": "2026-10-27",
+  "devicePixelRatio": 3,
+  "transientResize": { "$comment": "Seen mid-fold on the Xcode 27.1 simulator (dev.to/tyoukyou23, simulator, not hardware). Playwright and the playground fire it between poses.", "width": 466, "height": 498, "settleMs": 150 },
+  "poses": [
+    { "id": "closed-portrait", "label": "Closed", "display": "outer", "screen": { "width": 466, "height": 678 }, "viewport": { "width": 382, "svh": 580, "lvh": 618 }, "chrome": { "side": "right", "sideWidth": 84, "top": { "svh": 0, "lvh": 0 }, "bottom": { "svh": 98, "lvh": 60 }, "estimated": true }, "crease": null, "sizeClass": "compact width, regular height" },
+    { "id": "closed-landscape", "label": "Closed, wide", "display": "outer", "screen": { "width": 678, "height": 466 }, "viewport": { "width": 594, "svh": 368, "lvh": 406 }, "chrome": { "side": "right", "sideWidth": 84, "top": { "svh": 0, "lvh": 0 }, "bottom": { "svh": 98, "lvh": 60 }, "estimated": true }, "crease": null, "sizeClass": "compact width, compact height" },
+    { "id": "open-landscape", "label": "Open", "display": "inner", "screen": { "width": 951, "height": 669 }, "viewport": { "width": 951, "svh": 585, "lvh": 620 }, "chrome": { "side": null, "sideWidth": 0, "top": { "svh": 49, "lvh": 49 }, "bottom": { "svh": 35, "lvh": 0 }, "estimated": true }, "crease": { "axis": "vertical", "screenPos": 475.5, "viewportPos": 475.5, "estimated": false }, "sizeClass": "regular width, regular height" },
+    { "id": "open-portrait", "label": "Open, tall", "display": "inner", "screen": { "width": 669, "height": 951 }, "viewport": { "width": 669, "svh": 867, "lvh": 902 }, "chrome": { "side": null, "sideWidth": 0, "top": { "svh": 49, "lvh": 49 }, "bottom": { "svh": 35, "lvh": 0 }, "estimated": true }, "crease": { "axis": "horizontal", "screenPos": 475.5, "viewportPos": 426.5, "estimated": true }, "sizeClass": "regular width, regular height" },
+    { "id": "split-view", "label": "Split View", "display": "inner", "screen": { "width": 951, "height": 669 }, "viewport": { "width": 385, "svh": 571, "lvh": 609 }, "chrome": { "side": "outer", "sideWidth": 84, "top": { "svh": 0, "lvh": 0 }, "bottom": { "svh": 98, "lvh": 60 }, "divider": 13, "estimated": true }, "crease": { "axis": "vertical", "screenPos": 475.5, "viewportPos": null, "estimated": false }, "sizeClass": "compact width, regular height (each window)" }
+  ],
+  "sources": [
+    { "title": "WebKit Features for Safari 27.1", "url": "https://webkit.org/blog/18486/webkit-features-for-safari-27-1/" },
+    { "title": "Apple HIG: Designing for iPhone Duo", "url": "https://developer.apple.com/design/human-interface-guidelines/designing-for-iphone-duo" },
+    { "title": "Apple: Preparing your app for iPhone Duo", "url": "https://developer.apple.com/documentation/technologyoverviews/preparing-your-app-for-iphone-duo" },
+    { "title": "Simulator measurements (dev.to, tyoukyou23)", "url": "https://dev.to/tyoukyou23/i-measured-what-safari-actually-gives-your-web-page-on-iphone-duo-8jp" }
+  ]
+}

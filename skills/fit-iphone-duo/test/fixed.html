@@ -1,0 +1,57 @@
+<!doctype html>
+<!-- Self-test page: broken.html with every problem fixed the way FIXES.md recommends. duo-audit should find nothing. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fixed</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: #f6f4ee; }                                  /* background: the page's own colour */
+  body { font: 16px/1.5 system-ui, sans-serif; color: #111; }
+  header { position: sticky; top: 0; height: 56px; background: #fff; display: flex; align-items: center; justify-content: space-between;
+           padding-left: max(16px, env(safe-area-inset-left)); padding-right: max(16px, env(safe-area-inset-right)); }
+  .links a { margin-left: 12px; }
+  .menu { position: relative; display: inline-block; }
+  .sub { display: none; position: absolute; top: 100%; right: 0; background: #fff; }
+  .menu:focus-within > .sub, .menu.open > .sub { display: block; }
+  @media (hover: hover) { .menu:hover > .sub { display: block; } }
+  .hero { min-height: 70vh; min-height: 70dvh; display: grid; place-items: center; text-align: center; padding: 24px; }
+  .hero > div { width: 100%; }   /* a shrink-wrapped box would wrap the pair onto two lines, each button alone on the centre */
+  .cta { display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; }
+  .cta a { flex: 0 1 180px; padding: 14px 0; background: #2b5; color: #fff; border-radius: 10px; text-decoration: none; }
+  .cta a + a { background: #fff; color: #111; border: 1px solid #ccc; }
+  .tools { display: flex; justify-content: center; gap: 8px; margin-top: 12px; }   /* an even row of equal buttons: the gap sits on the crease */
+  .tools button { flex: 0 0 88px; }
+  .grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; padding: 24px; }
+  @media (min-width: 600px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .card { background: #fff; padding: 16px; border-radius: 12px; }
+  .wide-thing { width: 100%; max-width: 420px; height: 40px; background: #fc6; margin: 0 auto; }
+  .banner { position: fixed; left: 12px; right: 12px; bottom: 12px; max-width: 520px; margin: 0 auto; background: #222; color: #fff; padding: 10px 14px; border-radius: 12px; }
+  @media (max-height: 420px) { .banner { position: static; margin: 0 16px 16px; } }
+  @media (max-width: 599px) { .links a:not(:first-child) { display: none; } }
+</style>
+</head>
+<body>
+<header><strong>Fixed Co</strong>
+  <nav class="links"><a href="#a">Product</a><a href="#b">Pricing</a><a href="#c">Docs</a><a href="#d">Blog</a>
+    <span class="menu"><a href="#m">More</a><span class="sub"><a href="#s1">One</a><a href="#s2">Two</a></span></span></nav>
+</header>
+<main>
+  <section class="hero"><div>
+    <h1>Everything works here</h1>
+    <div class="cta"><a href="#buy">Buy now</a><a href="#tour">Take the tour</a></div>
+    <div class="tools"><button>Share</button><button>Save</button><button>Print</button><button>Copy</button></div>
+    <div class="wide-thing"></div>
+  </div></section>
+  <section class="grid">
+    <div class="card"><h3>One</h3><a href="#1">Read one</a></div>
+    <div class="card"><h3>Two</h3><a href="#2">Read two</a></div>
+    <div class="card"><h3>Three</h3><a href="#3">Read three</a></div>
+    <div class="card"><h3>Four</h3><a href="#4">Read four</a></div>
+  </section>
+</main>
+<footer><p style="padding: 0 16px">Footer</p></footer>
+<div class="banner">We use cookies. <button>Accept</button></div>
+</body>
+</html>

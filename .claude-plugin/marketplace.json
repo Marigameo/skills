@@ -1,12 +1,12 @@
 {
   "name": "marigameo-skills",
-  "description": "Skills for crafting UI components carefully with coding agents, for using agent-clarifier and co-presence, and for adding diagrams to a chat product.",
+  "description": "Skills for crafting UI components carefully with coding agents, for using agent-clarifier and co-presence, for adding diagrams to a chat product, and for fitting websites to iPhone Duo.",
   "owner": { "name": "Mari (Mariappan Subramanian)" },
   "plugins": [
     {
       "name": "mari-skills",
       "source": ".",
-      "description": "craft-component, ask-clarifier, show-co-presence and draw-diagrams."
+      "description": "craft-component, ask-clarifier, show-co-presence, draw-diagrams and fit-iphone-duo."
     }
   ]
 }
