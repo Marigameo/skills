@@ -25,7 +25,7 @@ const NARROW = 240; // a control narrower than this on the crease is a lost tap;
 
 // ——— arguments and Playwright ———
 const argv = process.argv.slice(2);
-const opt = (k, d) => (argv.includes(k) ? argv[argv.indexOf(k) + 1] : d);
+const opt = (k, d) => { const v = argv[argv.indexOf(k) + 1]; return argv.includes(k) && v && !v.startsWith('--') ? v : d; };
 const urls = argv.filter((a) => /^(https?|file):\/\//i.test(a));
 const outDir = path.resolve(opt('--out', 'duo-report'));
 const engine = opt('--engine', 'webkit');
@@ -153,11 +153,12 @@ function cssRules(text) {
 }
 function staticFindings(cssTexts, viewportMeta) {
   const rules = cssTexts.flatMap((t) => cssRules(t.replace(/\/\*[\s\S]*?\*\//g, '')));
-  const vh = rules.filter((r) => /(^|;)\s*(min-|max-)?height\s*:[^;]*\b\d*\.?\d+vh\b/i.test(r.decls) && !/\b\d*\.?\d+[dsl]vh\b/i.test(r.decls)).map((r) => cleanSel(r.selector, 70));
-  const hoverOnly = rules.filter((r) => /:hover\s*[>~+ ]\s*[^,]/.test(r.selector) && /(^|;)\s*(display|visibility)\s*:/i.test(r.decls) && !r.media.some((m) => /hover\s*:\s*hover/i.test(m))).map((r) => cleanSel(r.selector, 70));
-  const insets = rules.filter((r) => /(^|;)\s*(padding|margin)\s*:\s*[^;]*env\(safe-area-inset-(left|right)[^;]*/i.test(r.decls) && !/safe-area-inset-left[^;]*safe-area-inset-right|safe-area-inset-right[^;]*safe-area-inset-left/i.test(r.decls)
-    || /(padding|margin)-right\s*:[^;]*safe-area-inset-left|(padding|margin)-left\s*:[^;]*safe-area-inset-right/i.test(r.decls)).map((r) => cleanSel(r.selector, 70));
-  const topInset = rules.filter((r) => /(^|;)\s*padding(-top)?\s*:[^;]*env\(safe-area-inset-top/i.test(r.decls) && /header|nav|top|bar/i.test(r.selector)).map((r) => cleanSel(r.selector, 70));
+  const selectorsOf = (test) => rules.filter(test).map((r) => cleanSel(r.selector, 70));
+  const vh = selectorsOf((r) => /(^|;)\s*(min-|max-)?height\s*:[^;]*\b\d*\.?\d+vh\b/i.test(r.decls) && !/\b\d*\.?\d+[dsl]vh\b/i.test(r.decls));
+  const hoverOnly = selectorsOf((r) => /:hover\s*[>~+ ]\s*[^,]/.test(r.selector) && /(^|;)\s*(display|visibility)\s*:/i.test(r.decls) && !r.media.some((m) => /hover\s*:\s*hover/i.test(m)));
+  const insets = selectorsOf((r) => /(^|;)\s*(padding|margin)\s*:\s*[^;]*env\(safe-area-inset-(left|right)[^;]*/i.test(r.decls) && !/safe-area-inset-left[^;]*safe-area-inset-right|safe-area-inset-right[^;]*safe-area-inset-left/i.test(r.decls)
+    || /(padding|margin)-right\s*:[^;]*safe-area-inset-left|(padding|margin)-left\s*:[^;]*safe-area-inset-right/i.test(r.decls));
+  const topInset = selectorsOf((r) => /(^|;)\s*padding(-top)?\s*:[^;]*env\(safe-area-inset-top/i.test(r.decls) && /header|nav|top|bar/i.test(r.selector));
   const usesInsets = rules.some((r) => /safe-area-inset/.test(r.decls));
   const cover = /viewport-fit\s*=\s*cover/i.test(viewportMeta || '');
   const uniq = (a) => [...new Set(a)].slice(0, 8);
@@ -184,11 +185,10 @@ const browser = await browserType.launch();
 const version = browser.version();
 const context = async (pose, extra = {}) => browser.newContext({
   viewport: { width: pose.viewport.width, height: pose.viewport.svh }, deviceScaleFactor: GEO.devicePixelRatio,
-  isMobile: engine === 'webkit' || engine === 'chromium', hasTouch: true, userAgent: UA.iphone, reducedMotion: 'reduce', ...extra,
+  isMobile: true, hasTouch: true, userAgent: UA.iphone, reducedMotion: 'reduce', acceptDownloads: false, ...extra,
 });
 async function open(ctx, url) {
   const page = await ctx.newPage();
-  await page.route('**/*', (route) => (route.request().resourceType() === 'download' ? route.abort() : route.continue()));
   const res = await page.goto(url, { waitUntil: 'load', timeout: 45000 });
   try { await page.waitForLoadState('networkidle', { timeout: 8000 }); } catch {}
   await sleep(1200);
@@ -229,8 +229,7 @@ for (const url of urls) {
       await walk(page, pose.viewport.svh);
       const p = await page.evaluate(probePage, { crease: pose.crease, controlSel: CONTROL_SEL });
       const controls = await controlsWithFrames(page);
-      viewportMeta = p.viewportMeta;
-      row.sideways = p.scrollWidth > p.vw + 1; row.share = Math.round(p.share * 100); row.creaseHits = 0;
+      row.sideways = p.scrollWidth > p.vw + 1; row.share = Math.round(p.share * 100);
       if (row.sideways) add('fix', 'sideways', 'Scrolls sideways', pose, { width: p.scrollWidth, offenders: p.offenders.map((o) => ({ ...o, sel: clean(o.sel) })) });
       if (pose.crease && pose.crease.axis === 'vertical' && pose.id !== 'split-view') {
         const X = pose.crease.viewportPos;
@@ -259,10 +258,12 @@ for (const url of urls) {
       if (pose.id === 'closed-portrait') {
         const far = p.edge.filter((e) => e && e !== 'image' && Math.hypot(e[0] - p.pageBg[0], e[1] - p.pageBg[1], e[2] - p.pageBg[2]) > 60);
         if (far.length >= 2) add('check', 'background', "Page background doesn't match the page at the edge", pose, { pageBg: p.pageBg, edge: p.edge });
+        viewportMeta = p.viewportMeta;
         cssTexts = await page.evaluate(() => [...document.querySelectorAll('style')].map((s) => s.textContent || ''));
         const hrefs = await page.evaluate(() => [...document.querySelectorAll('link[rel~="stylesheet"][href]')].map((l) => l.href));
         let total = cssTexts.reduce((s, t) => s + t.length, 0);
-        for (const h of hrefs.slice(0, 30)) { if (total > 4e6) break; try { const r = await ctx.request.get(h, { timeout: 15000 }); if (r.ok()) { const t = await r.text(); cssTexts.push(t); total += t.length; } } catch {} }
+        const sheets = await Promise.allSettled(hrefs.slice(0, 30).map(async (h) => { const r = await ctx.request.get(h, { timeout: 15000 }); return r.ok() ? r.text() : ''; }));
+        for (const sh of sheets) { if (total > 4e6) break; if (sh.status === 'fulfilled' && sh.value) { cssTexts.push(sh.value); total += sh.value.length; } }
       }
       await page.screenshot({ path: path.join(outDir, `${slug(url)}-${pose.id}.png`) });
     } catch (e) {
@@ -290,7 +291,7 @@ for (const url of urls) {
     try { const { page } = await open(ctx, url); if (steps) await steps(page); await page.evaluate(() => scrollTo(0, 0)); await sleep(300); return await page.evaluate(signature); } finally { await ctx.close(); }
   };
   try {
-    const screenOpen = { screen: { width: open951.screen.width, height: open951.screen.height } };
+    const screenOpen = { screen: open951.screen };
     const fresh = await sigAt(open951, screenOpen), fresh2 = await sigAt(open951, screenOpen);
     const noise = diff(fresh2, fresh).changed;
     const sev = noise ? 'check' : 'fix';
@@ -303,7 +304,7 @@ for (const url of urls) {
     if (d1.changed) add(sev, 'resize', 'Layout after opening differs from a fresh load at the open size', open951, { ...d1, noisy: noise });
     const mac = diff(await sigAt(open951, { ...screenOpen, userAgent: UA.mac, isMobile: false }), fresh);
     if (mac.changed) add('check', 'ua', 'Layout differs between the iPhone and Mac user agents at the same size', open951, { ...mac, noisy: noise });
-    const stale = diff(await sigAt(open951, { screen: { width: closed.screen.width, height: closed.screen.height } }), fresh);
+    const stale = diff(await sigAt(open951, { screen: closed.screen }), fresh);
     if (stale.changed) add(sev, 'screen', 'Layout depends on screen.width, which stays at the closed size after opening', open951, { ...stale, noisy: noise });
     entry.noisy = noise;
   } catch (e) { add('check', 'behaviour', 'Behaviour checks did not complete', null, { error: clean(e && e.message, 80) }); }
@@ -332,11 +333,20 @@ const today = new Date().toISOString().slice(0, 10);
 const totalFix = report.reduce((s, e) => s + e.findings.filter((f) => f.sev === 'fix').length, 0);
 const md = [`# iPhone Duo audit`, '',
   `Ran ${today} in Playwright ${engine === 'webkit' ? 'WebKit' : 'Chromium'} ${clean(version, 20)} at the viewports WebKit published for Safari 27.1 (\`poses.json\`, collected ${GEO.collected}). This is emulation: the right engine family and sizes, not Safari 27.1 itself. Confirm in Safari before calling it done (\`duo-simulator.sh\`, or a device).`, ''];
+// Crease hits are counted only on "Open" (the vertical crease); elsewhere the column shows "–".
+const creaseCell = (r) => {
+  if (r.creaseHits == null) return '–';
+  return r.creaseHits ? `**${r.creaseHits}**` : '0';
+};
+const sidewaysCell = (r) => {
+  if (r.failed) return `not checked: ${r.failed}`;
+  return r.sideways ? '**yes**' : 'no';
+};
 for (const e of report) {
   md.push(`## ${clean(e.url, 120)}`, '');
   if (e.failed) { md.push(`**Not checked: ${e.failed}. This is not a pass.**`, ''); continue; }
   md.push('| Pose | Viewport | Sideways scroll | Controls on the crease | Fixed bars |', '|---|---|---|---|---|');
-  for (const r of e.poses) md.push(`| ${r.label} | ${r.w} × ${r.h} | ${r.failed ? `not checked: ${r.failed}` : r.sideways ? '**yes**' : 'no'} | ${r.creaseHits === undefined ? '–' : POSES.find((q) => q.id === r.id).crease && r.id !== 'split-view' && r.id !== 'open-portrait' ? (r.creaseHits ? `**${r.creaseHits}**` : '0') : '–'} | ${r.share ?? '–'}% |`);
+  for (const r of e.poses) md.push(`| ${r.label} | ${r.w} × ${r.h} | ${sidewaysCell(r)} | ${creaseCell(r)} | ${r.share ?? '–'}% |`);
   const fix = e.findings.filter((f) => f.sev === 'fix'), chk = e.findings.filter((f) => f.sev === 'check');
   md.push('', `### To fix (${fix.length})`, '', fix.length ? fix.map(fmt).join('\n') : 'Nothing.', '', `### To check (${chk.length})`, '', chk.length ? chk.map(fmt).join('\n') : 'Nothing.', '');
 }

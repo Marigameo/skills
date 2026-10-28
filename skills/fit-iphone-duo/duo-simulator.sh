@@ -47,6 +47,15 @@ behind them, and the real crease position on "Open, tall". The playground's samp
 posture and segments live, so it doubles as a probe:
   https://marigameo.github.io/iphone-duo-playground/sample/
 
-Press Return when done; the simulator is then shut down and deleted.
 EOF
-read -r _
+
+# Run by a person in a terminal: wait for them, then clean up. Run by an agent (no terminal to read from):
+# waiting would return at once and delete the simulator before anyone could use it, so leave it running.
+if [ -t 0 ]; then
+  echo "Press Return when done; the simulator is then shut down and deleted."
+  read -r _
+else
+  trap - EXIT
+  echo "The simulator stays open for the owner to use. When they're done, remove it with:"
+  echo "  xcrun simctl shutdown $UDID && xcrun simctl delete $UDID"
+fi

@@ -32,6 +32,7 @@ On the open screen the fold runs down the centre. Small controls there are hard 
 2. **Even rows.** A centred row of 3 icons or links puts the middle one on the crease. Make it 2 or 4 items of equal width, or align the row to one side.
 3. **Move it to one side** on wide screens, next to the content it acts on. Apple asks controls to sit near what they affect anyway.
    ```css
+   .hero { container: hero / inline-size; }   /* a container query needs a declared container */
    @container hero (min-width: 760px) { .hero-actions { justify-content: flex-start; } }
    ```
 4. **Nav triggers.** A desktop nav whose middle item lands on the centre: put the gap there with `justify-content: space-between` around two groups, or reorder so the centre falls between items.
@@ -51,6 +52,7 @@ Re-run the audit. A fix that moves a control off the crease at 951 shouldn't pus
 Three equal columns put the middle card on the fold. Use two or four on wide screens:
 
 ```css
+.cards-section { container-type: inline-size; }   /* the cards' parent; without it the queries below never match */
 .cards { display: grid; gap: 20px; grid-template-columns: minmax(0, 1fr); }
 @container (min-width: 600px) { .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @container (min-width: 1100px) { .cards { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
