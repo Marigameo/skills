@@ -46,6 +46,18 @@ try { pw = createRequire(path.join(process.cwd(), 'x.js'))(process.env.PLAYWRIGH
   process.exit(2);
 }
 fs.mkdirSync(path.join(outDir, 'shots'), { recursive: true });
+// A re-run into the same folder replaces the last run's pictures. Only files the last report lists are removed,
+// so anything else in shots/ stays.
+{
+  const last = (() => { try { return JSON.parse(fs.readFileSync(path.join(outDir, 'duo-report.json'), 'utf8')); } catch { return null; } })();
+  const shotsDir = path.join(outDir, 'shots') + path.sep;
+  for (const e of last?.report || []) {
+    for (const src of [...(e.poses || []).map((r) => r.shot), ...Object.values(e.fixedShots || {}), ...(e.items || []).flatMap((i) => [i.shot, ...(i.shots || []).map((s) => s.src)])]) {
+      const f = src && path.resolve(outDir, src);
+      if (f && f.startsWith(shotsDir) && f.endsWith('.jpg')) fs.rmSync(f, { force: true });
+    }
+  }
+}
 
 const cleanSel = (v, max = 80) => String(v ?? '').replace(/\\(.)/g, '$1').replace(/[\u0000-\u001f\u007f-\u009f`|<]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, max);
 const clean = (v, max = 80) => String(v ?? '').replace(/[\u0000-\u001f\u007f-\u009f`|<>[\]\\]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, max);
@@ -54,6 +66,9 @@ const slug = (u) => { try { const x = new URL(u); return (x.hostname + x.pathnam
 // Item keys name the thing, not where it was measured, so they stay the same from one run to the next.
 const kslug = (v, max = 40) => String(v ?? '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, max);
 const keyOf = (...parts) => parts.map((p) => kslug(p)).filter(Boolean).join(':');
+
+// The earlier run (--before): its items are looked for again, to picture the ones that are now fixed.
+const prev = (() => { if (!before) return null; try { return JSON.parse(fs.readFileSync(path.join(path.resolve(before), 'duo-report.json'), 'utf8')); } catch { return null; } })();
 
 // ——— in-page probes (run inside the audited page; values go in as arguments, nothing is pasted into code) ———
 const CONTROL_SEL = 'a[href],button,input:not([type=hidden]),select,textarea,summary,[role=button],[role=link],[role=tab],[role=menuitem],[onclick],[tabindex]:not([tabindex="-1"])';
@@ -189,6 +204,21 @@ function vhSets({ list, slack }) {
       || (p === 'min-height' && cs.minHeight.endsWith('px') && px(cs.minHeight) + extra + slack >= r.height - 1)
       || (p === 'max-height' && cs.maxHeight.endsWith('px') && r.height >= px(cs.maxHeight) + extra - 1));
   });
+}
+
+// Finds an earlier run's element again by its selector and text, for an after picture. A hidden one (say, a fix hid it)
+// gives way to the nearest visible ancestor. Page coordinates; null when nothing matches.
+function locate({ sel, text, nth = 0 }) {
+  let els = [];
+  try { els = [...document.querySelectorAll(sel)]; } catch { return null; }
+  const t = (text || '').toLowerCase().slice(0, 30);
+  const same = els.filter((e) => !t || (e.getAttribute('aria-label') || e.textContent || '').trim().replace(/\s+/g, ' ').toLowerCase().startsWith(t));
+  const shown = same.filter((e) => e.getBoundingClientRect().height >= 1);
+  let el = shown[nth] || shown[0] || same[0] || els[0];
+  while (el && el.getBoundingClientRect().height < 1) el = el.parentElement;
+  if (!el) return null;
+  const r = el.getBoundingClientRect();
+  return { x: Math.round(r.left), y: Math.round(r.top + scrollY), w: Math.round(r.width), h: Math.round(r.height) };
 }
 
 // Draws the marks for a screenshot on top of the page. Marks are in page coordinates (fixed ones in viewport
@@ -332,7 +362,7 @@ for (const url of urls) {
   const entry = { url, poses: [], findings: [], failed: '' };
   report.push(entry);
   const add = (sev, id, title, pose, detail) => entry.findings.push({ sev, id, title, pose, detail });
-  const base = slug(url), shotted = new Set();
+  const base = slug(url), shotted = new Set(), now = {};
   // One picture per thing: the same element cut off at two sizes is shown once.
   const once = async (key, fn) => { if (!withShots || shotted.has(key)) return null; shotted.add(key); return fn(); };
   // Read on "Closed", the first pose in poses.json, so the animated selectors are known before "Open".
@@ -346,6 +376,9 @@ for (const url of urls) {
       await walk(page, pose.viewport.svh);
       const p = await page.evaluate(probePage, { crease: pose.crease, controlSel: CONTROL_SEL });
       const controls = await controlsWithFrames(page, animated);
+      // Which of the page's identical controls this is (a GitHub link in the hero and another in the footer), to find it again.
+      const seen = new Map();
+      for (const c of controls) { if (c.frame) continue; const k = `${c.sel}|${c.text}`; c.nth = seen.get(k) || 0; seen.set(k, c.nth + 1); }
       const wide = p.scrollWidth > p.vw + 1;
       row.sideways = wide && !p.rootClips; row.cutoff = wide && p.rootClips; row.share = Math.round(p.share * 100);
       if (wide) {
@@ -370,7 +403,7 @@ for (const url of urls) {
             const fixed = h.pin === 'fixed';
             const shot = i < SHOTS_PER_CHECK ? await once(keyOf(id, h.sel, h.text), () => snap(page, `${base}-${pose.id}-${id}-${i + 1}`, { focus: { y: h.pageY, h: h.h },
               marks: [{ x: h.x, y: fixed ? h.y : h.pageY, fixed, w: h.w, h: h.h }], lines: [{ x: X }] })) : null;
-            out.push({ sel: clean(h.sel), text: clean(h.text, 50), from: Math.round(h.x), to: Math.round(h.x + h.w), pageY: Math.round(h.pageY), frame: h.frame, shot });
+            out.push({ sel: clean(h.sel), text: clean(h.text, 50), from: Math.round(h.x), to: Math.round(h.x + h.w), pageY: Math.round(h.pageY), frame: h.frame, nth: h.nth || 0, shot });
           }
           return out;
         };
@@ -393,7 +426,7 @@ for (const url of urls) {
           const out = [];
           for (const [i, h] of hits.slice(0, 10).entries()) {
             const shot = await once(keyOf('crease-h', h.sel, h.text), () => snap(page, `${base}-${pose.id}-crease-h-${i + 1}`, { marks: [{ x: h.x, y: h.y, w: h.w, h: h.h, fixed: true }], lines: [{ y: Y, fixed: true }] }));
-            out.push({ sel: clean(h.sel), text: clean(h.text, 50), shot });
+            out.push({ sel: clean(h.sel), text: clean(h.text, 50), nth: h.nth || 0, shot });
           }
           add('check', 'crease-h', 'Fixed controls on the crease (open, tall; its height is estimated)', pose, { y: Y, hits: out });
         }
@@ -427,6 +460,14 @@ for (const url of urls) {
         animated = stat.animated.map(bareParts).flat();
       }
       if (stat && stat.vh.length) row.vhSets = await page.evaluate(vhSets, { list: stat.vh.map((s) => ({ parts: bareParts(s), props: stat.vhProps[s] || ['height'] })), slack: pose.viewport.lvh - pose.viewport.svh });
+      // After pictures: each earlier item measured at this pose, found again and outlined in green. Kept only if it's fixed.
+      const earlier = withShots ? (prev?.report.find((x) => x.url === url)?.items || []).filter((i) => i.find && i.poses[0]?.id === pose.id) : [];
+      for (const [n, it] of earlier.entries()) {
+        const box = await page.evaluate(locate, it.find); if (!box) continue;
+        const lines = ['crease', 'crease-moving', 'grid'].includes(it.check) && pose.crease?.axis === 'vertical' ? [{ x: pose.crease.viewportPos }]
+          : it.check === 'crease-h' && pose.crease ? [{ y: pose.crease.viewportPos, fixed: true }] : [];
+        now[it.key] = await snap(page, `${base}-${pose.id}-after-${n + 1}`, { focus: box, lines, marks: [{ ...box, w: Math.min(box.w, pose.viewport.width - box.x), color: '#18794e' }] });
+      }
       row.shot = await snap(page, `${base}-${pose.id}`);
     } catch (e) {
       row.failed = clean(e && e.message, 80);
@@ -486,6 +527,9 @@ for (const url of urls) {
   } catch (e) { add('check', 'behaviour', 'Behaviour checks did not complete', null, { error: clean(e && e.message, 80) }); }
   entry.elsewhere = s.elsewhere;
   entry.items = itemsOf(entry);
+  const keys = new Set(entry.items.map((i) => i.key));
+  entry.fixedShots = {};
+  for (const [k, rel] of Object.entries(now)) { if (keys.has(k)) fs.rmSync(path.join(outDir, rel), { force: true }); else entry.fixedShots[k] = rel; }
 }
 await browser.close();
 
@@ -496,15 +540,15 @@ function itemsOf(entry) {
     const pose = f.pose ? { id: f.pose.id, label: f.pose.label } : null;
     const was = items.get(key);
     if (was) { if (pose && !was.poses.some((p) => p.id === pose.id)) was.poses.push(pose); if (it.lines) was.lines.push(...it.lines.map((l) => (pose ? `${pose.label}: ${l}` : l))); was.shot ||= it.shot || null; return; }
-    items.set(key, { key, check: f.id, sev: f.sev, title: f.title, poses: pose ? [pose] : [], subject: it.subject || '', lines: it.lines || [], shot: it.shot || null, shots: it.shots || [], swatches: it.swatches || null });
+    items.set(key, { key, check: f.id, sev: f.sev, title: f.title, poses: pose ? [pose] : [], subject: it.subject || '', lines: it.lines || [], shot: it.shot || null, shots: it.shots || [], swatches: it.swatches || null, find: it.find || null });
   };
   const at = (f) => (f.pose ? `${f.pose.viewport.width} wide` : '');
   for (const f of entry.findings) {
     const d = f.detail;
-    if (d.offenders) for (const o of d.offenders) put(keyOf(f.id, o.sel), f, { subject: `\`${o.sel}\``, lines: [`reaches x = ${o.right}, ${o.right - f.pose.viewport.width}px past the ${at(f)} edge (${o.width}px wide)`], shot: o.shot });
-    else if (d.hits) for (const h of d.hits) put(keyOf(f.id, h.sel, h.text), f, { subject: `\`${h.sel}\`${h.text ? ` "${h.text}"` : ''}`, shot: h.shot,
+    if (d.offenders) for (const o of d.offenders) put(keyOf(f.id, o.sel), f, { find: { sel: o.sel }, subject: `\`${o.sel}\``, lines: [`reaches x = ${o.right}, ${o.right - f.pose.viewport.width}px past the ${at(f)} edge (${o.width}px wide)`], shot: o.shot });
+    else if (d.hits) for (const h of d.hits) put(keyOf(f.id, h.sel, h.text), f, { find: { sel: h.sel, text: h.text, nth: h.nth || 0 }, subject: `\`${h.sel}\`${h.text ? ` "${h.text}"` : ''}`, shot: h.shot,
       lines: [h.from != null ? `${h.to - h.from}px wide, spans x ${h.from}–${h.to}; the crease is at x = ${d.x}` : `crosses the line at y ≈ ${d.y}`, ...(h.frame ? [`inside a frame: ${h.frame}`] : [])] });
-    else if (d.grids) for (const g of d.grids) put(keyOf('grid', g.sel), f, { subject: `\`${g.sel}\``, lines: [`${g.columns} equal columns; the middle one sits on the crease`], shot: g.shot });
+    else if (d.grids) for (const g of d.grids) put(keyOf('grid', g.sel), f, { find: { sel: g.sel }, subject: `\`${g.sel}\``, lines: [`${g.columns} equal columns; the middle one sits on the crease`], shot: g.shot });
     else if (f.id === 'bars') put(keyOf('bars', f.pose.id), f, { shot: d.shot, lines: [`${d.share}% of the ${f.pose.viewport.svh}px height`, ...d.bars.map((b) => `\`${b.sel}\` ${b.h}px tall at y ${b.y}`)] });
     else if (f.id === 'covered') put(keyOf('covered', f.pose.id), f, { shot: d.shot, lines: d.covered.map((c) => `\`${c.sel}\`${c.text ? ` "${c.text}"` : ''} under \`${c.by}\``) });
     else if (f.id === 'overlay') put(keyOf('overlay', d.sel), f, { subject: `\`${d.sel}\``, shot: d.shot, lines: ['covers more than 85% of the screen at load'] });
@@ -543,7 +587,12 @@ const fmt = (f) => {
   return lines.join('\n');
 };
 const today = new Date().toISOString().slice(0, 10);
-const totalFix = report.reduce((s, e) => s + e.findings.filter((f) => f.sev === 'fix').length, 0);
+// A to-fix item the owner agreed to leave (level "leave" in the triage, here or carried over from --before) doesn't fail
+// the run. The report still shows it.
+const triage = [path.join(outDir, 'duo-triage.json'), before && path.join(path.resolve(before), 'duo-triage.json')].filter(Boolean)
+  .map((f) => { try { return JSON.parse(fs.readFileSync(f, 'utf8')); } catch { return null; } }).find(Boolean) || {};
+const fixItems = report.flatMap((e) => (e.items || []).filter((it) => it.sev === 'fix').map((it) => triage.pages?.[e.url]?.[it.key]?.level));
+const leftFix = fixItems.filter((lvl) => lvl === 'leave').length, totalFix = fixItems.length - leftFix;
 const intro = `Ran ${today} in Playwright ${engine === 'webkit' ? 'WebKit' : 'Chromium'} ${clean(version, 20)} at the viewports WebKit published for Safari 27.1 (\`poses.json\`, collected ${GEO.collected}). This is emulation: the right engine family and sizes, not Safari 27.1 itself. Confirm in Safari before calling it done (\`duo-simulator.sh\`, or a device). Pages are measured with reduced motion on, so animations are stopped where the page's reduced-motion styles leave them.`;
 const md = [`# iPhone Duo audit`, '', intro, '', 'The visual report is `duo-report.html`. Triage: one entry per item key below in `duo-triage.json` (SKILL.md, step 3).', ''];
 // Crease hits are counted only on "Open" (the vertical crease); elsewhere the column shows "–".
@@ -570,5 +619,5 @@ fs.writeFileSync(path.join(outDir, 'duo-report.md'), md.join('\n'));
 fs.writeFileSync(path.join(outDir, 'duo-report.json'), JSON.stringify({ ran: today, engine, version, poses: GEO.collected, intro,
   report: report.map((e) => ({ ...e, findings: e.findings.map((f) => ({ ...f, pose: f.pose ? f.pose.id : null })) })) }, null, 2));
 const html = render(outDir, { before });
-console.log(`\n${totalFix ? `${totalFix} to fix.` : 'Nothing to fix.'} Report: ${html}\nFor agents: ${path.join(outDir, 'duo-report.md')}, duo-report.json`);
+console.log(`\n${totalFix ? `${totalFix} to fix.` : 'Nothing to fix.'}${leftFix ? ` ${leftFix} more marked Leave in the triage.` : ''} Report: ${html}\nFor agents: ${path.join(outDir, 'duo-report.md')}, duo-report.json`);
 process.exit(totalFix || report.some((e) => e.failed) ? 1 : 0);

@@ -5,6 +5,7 @@ import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { render } from '../duo-report.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const out = fs.mkdtempSync(path.join(fs.realpathSync(process.env.TMPDIR || '/tmp'), 'duo-selftest-'));
@@ -44,6 +45,11 @@ for (const [name, u] of Object.entries(pages)) {
 const srcs = [...html.matchAll(/src="([^"]+)"/g)].map((m) => m[1]);
 const lost = srcs.filter((s) => !fs.existsSync(path.join(out, s)));
 check(srcs.length > 0 && !lost.length, `report: all ${srcs.length} pictures exist${lost.length ? ` (missing: ${lost.join(', ')})` : ''}`);
+
+// Comparing a run with itself: every item is still there, nothing fixed, nothing new.
+const items = report.reduce((n, e) => n + e.items.length, 0);
+const again = fs.readFileSync(render(out, { before: out }), 'utf8');
+check(again.includes(`0 fixed · ${items} still there · 0 new`), `report --before: a run against itself has ${items} still there, none fixed or new`);
 
 fs.rmSync(out, { recursive: true, force: true });
 console.log(failed ? `\n${failed} failed` : '\nall passed');

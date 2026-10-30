@@ -76,7 +76,7 @@ Unsure between two levels? Take the one that asks more of the owner.
        "crease:a-pill:github": { "level": "you", "question": "4 links or 6?", "fix": "Five centred links always put one on the crease" },
        "vh:hero": { "level": "leave", "fix": "Never sets the height: the content is taller" } } } }
    ```
-   `level` is `safe`, `pick`, `you` or `leave`. `fix` is the change (or, for Leave, the reason), `where` is the file and line, `question` is what a Needs-you item asks, and `with` names the item whose fix clears this one, so the plan counts one change. Then re-render: `node <skill>/duo-report.mjs duo-report`. The top of the page now says what "go" does and lists the questions. **Gate:** point the owner at `duo-report.html` and wait for "go", answers, or level changes. Update the triage and re-render when levels change.
+   `level` is `safe`, `pick`, `you` or `leave`. `fix` is the change (or, for Leave, the reason), `where` is the file and line, `question` is what a Needs-you item asks, and `with` names the item whose fix clears this one, so the plan counts one change. When the owner answers a Needs-you item, put the answer in `answer`: the card shows it and "go" includes it. An answer of "leave it" moves the item to `leave`, with the reason. Then re-render: `node <skill>/duo-report.mjs duo-report`. The top of the page now says what "go" does and lists the questions. **Gate:** point the owner at `duo-report.html` and wait for "go", answers, or level changes. Update the triage and re-render when levels change.
 4. **Fix.** On "go", make every Safe fix and My pick. Make a Needs-you item only once it's answered, as answered. Work in this order, because earlier fixes often clear later items:
    1. Sideways scroll
    2. Sizes read once, and user-agent or `screen.width` branching
@@ -113,7 +113,7 @@ Unsure between two levels? Take the one that asks more of the owner.
 
 ## Done means
 
-- [ ] The audit reports nothing to fix at all five poses, for every template audited.
+- [ ] The audit reports nothing to fix at all five poses, for every template audited. A to-fix item the owner agreed to leave, marked Leave with its reason, doesn't count; the audit says so.
 - [ ] Every remaining item is marked Leave in the triage, with its reason.
 - [ ] Opening and closing in the playground keeps the page working, with no reload and no stale layout.
 - [ ] The fixes hold at desktop widths too. Nothing detects the device.

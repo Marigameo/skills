@@ -85,7 +85,12 @@ export function render(dir, { before = '' } = {}) {
     sorted.filter((i) => !i.parent).forEach(place);
     sorted.forEach(place);
     const keys = new Set(items.map((i) => i.key));
-    const fixed = (prevItems || []).filter((i) => !keys.has(i.key)).map((i) => ({ ...i, shot: relBefore(i.shot), shots: (i.shots || []).map((s) => ({ ...s, src: relBefore(s.src) })) }));
+    // A fixed item shows its earlier picture, and beside it the same element in this run when the audit found it again.
+    const fixed = (prevItems || []).filter((i) => !keys.has(i.key)).map((i) => {
+      const after = (e.fixedShots || {})[i.key], was = relBefore(i.shot);
+      const shots = after ? [...(was ? [{ label: `Before · ${i.poses[0]?.label || ''}`, src: was }] : []), { label: 'After', src: after }] : (i.shots || []).map((s) => ({ ...s, src: relBefore(s.src) }));
+      return { ...i, shot: after ? null : was, shots };
+    });
     return { e, items, fixed };
   });
 
@@ -101,11 +106,14 @@ export function render(dir, { before = '' } = {}) {
   else if (counts.none === all.length) plan.push(`<p class="plan-lead">${plural(all.length, 'item')} found, not triaged yet. Your agent sorts each one into a level next and re-renders this page.</p>`);
   else {
     // Count changes, not items: an item another fix clears is no extra work.
-    const doing = all.filter((i) => i.level === 'safe' || i.level === 'pick'), changes = doing.filter((i) => !i.parent);
-    const cs = changes.filter((i) => i.level === 'safe').length, cp = changes.length - cs;
-    if (changes.length) plan.push(`<p class="plan-lead">Reply <b>go</b> and your agent makes ${[cs && plural(cs, 'safe fix', 'safe fixes'), cp && `${cp} of its picks`].filter(Boolean).join(' and ')}${doing.length > changes.length ? `, which clear ${doing.length} items` : ''}.</p>`);
-    else plan.push('<p class="plan-lead">Nothing for the agent to do on its own.</p>');
-    const asks = pages.flatMap((p) => p.items.filter((i) => i.level === 'you'));
+    // A Needs-you item the owner has answered ("answer" in the triage) is a change like the others.
+    const answered = (i) => i.level === 'you' && !!i.tr.answer;
+    const doing = all.filter((i) => i.level === 'safe' || i.level === 'pick' || answered(i)), changes = doing.filter((i) => !i.parent);
+    const cs = changes.filter((i) => i.level === 'safe').length, cp = changes.filter((i) => i.level === 'pick').length, ca = changes.length - cs - cp;
+    const parts = [cs && plural(cs, 'safe fix', 'safe fixes'), cp && `${cp} of its picks`, ca && (ca === 1 ? 'the change you answered' : `the ${ca} changes you answered`)].filter(Boolean);
+    if (changes.length) plan.push(`<p class="plan-lead">Reply <b>go</b> and your agent makes ${parts.length > 1 ? `${parts.slice(0, -1).join(', ')} and ${parts.at(-1)}` : parts[0]}${doing.length > changes.length ? `, which clear ${doing.length} items` : ''}.</p>`);
+    else plan.push(`<p class="plan-lead">${all.some((i) => (i.level === 'you' && !i.tr.answer) || i.level === 'none') ? 'Nothing for the agent to do on its own.' : 'Nothing left to change.'}</p>`);
+    const asks = pages.flatMap((p) => p.items.filter((i) => i.level === 'you' && !i.tr.answer));
     if (asks.length) plan.push(`<p>${asks.length === 1 ? 'One needs' : `${asks.length} need`} your answer first:</p><ol class="asks">${asks.map((i) => `<li><a href="#${i.anchor}">#${i.n}</a> ${rich(i.tr.question || i.title)}</li>`).join('')}</ol>`);
     if (counts.leave) plan.push(`<p>${plural(counts.leave, 'item')} stay${counts.leave === 1 ? 's' : ''} as ${counts.leave === 1 ? 'it is' : 'they are'}, each with its reason.</p>`);
     if (counts.none) plan.push(`<p>${plural(counts.none, 'item')} not triaged yet.</p>`);
@@ -135,7 +143,8 @@ export function render(dir, { before = '' } = {}) {
     ${it.subject ? `<p class="subject">${rich(it.subject)}</p>` : ''}
     ${it.lines.length ? `<ul class="facts">${it.lines.map((l) => `<li>${rich(l)}</li>`).join('')}</ul>` : ''}
     ${swatches(it.swatches)}
-    ${tr.question && lvl === 'you' ? `<div class="box ask"><b>Your call</b><p>${rich(tr.question)}</p></div>` : ''}
+    ${tr.answer && lvl === 'you' ? `<div class="box ask"><b>Your answer</b><p>${rich(tr.answer)}</p>${tr.question ? `<p class="asked">Asked: ${rich(tr.question)}</p>` : ''}</div>`
+      : tr.question && lvl === 'you' ? `<div class="box ask"><b>Your call</b><p>${rich(tr.question)}</p></div>` : ''}
     ${tr.fix ? `<div class="box rec"><b>${lvl === 'leave' ? 'Why leave it' : lvl === 'you' ? 'Options' : 'The fix'}</b><p>${rich(tr.fix)}</p>${tr.where ? `<p class="where">${rich(tr.where)}</p>` : ''}</div>` : ''}
     ${tr.why ? `<p class="reason">${rich(tr.why)}</p>` : ''}
     <p class="why">${esc(WHY[it.check] || '')}</p>
@@ -222,7 +231,7 @@ a{color:var(--accent)}
 .box{border-radius:8px;padding:10px 12px;margin:10px 0;font-size:14px}
 .box b{display:block;font-size:12px;text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px}
 .box p{margin:0}.box .where{margin-top:6px}
-.ask{background:var(--you-bg)}.ask b{color:var(--you)}
+.ask{background:var(--you-bg)}.ask b{color:var(--you)}.ask .asked{margin-top:6px;font-size:13px;color:var(--muted)}
 .rec{background:var(--code)}
 .reason{font-size:14px;margin:8px 0}
 .why{font-size:13px;color:var(--muted);margin:10px 0 0}

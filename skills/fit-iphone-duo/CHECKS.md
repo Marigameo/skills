@@ -2,7 +2,7 @@
 
 `duo-audit.mjs` opens each URL at the five viewports Safari 27.1 gives a page on iPhone Duo (`poses.json`, from WebKit), in Playwright's WebKit, with touch, a pixel ratio of 3 and Safari 27.1's iPhone user agent. It scrolls the whole page so lazy sections load, then measures. It reads inside iframes too, so a chat widget's own buttons count. It runs with reduced motion on, so screenshots and comparisons hold still: animations stop wherever the page's reduced-motion styles leave them.
 
-**To fix** fails the run (exit 1). **To check** needs a person's judgement: it's often right, sometimes deliberate.
+**To fix** fails the run (exit 1), unless the triage marks the item Leave: the owner agreed to it, with a reason. **To check** needs a person's judgement: it's often right, sometimes deliberate.
 
 ## At each pose
 
