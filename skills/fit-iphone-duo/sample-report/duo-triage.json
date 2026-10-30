@@ -1,0 +1,106 @@
+{
+  "safari": "Skipped: this sample was made on a Mac without Xcode 27.1, so the iPhone Duo simulator wasn't available. The audit stands on its own.",
+  "pages": {
+    "http://localhost:4173/broken.html": {
+      "sideways:figure-app-shot": {
+        "level": "safe",
+        "fix": "The app preview has a fixed `width: 420px`. Make it `width: 100%; max-width: 640px`, so it fits the closed screen and stays capped on wide ones.",
+        "where": "`test/broken.html:56`"
+      },
+      "background": {
+        "level": "safe",
+        "fix": "`body` is `#111` behind a light page, so Safari would paint a dark column beside it on the closed screen. Give `html` and `body` the page's own colour, `var(--paper)`.",
+        "where": "`test/broken.html:22`"
+      },
+      "bars:closed-landscape": {
+        "level": "pick",
+        "fix": "Make the cookie notice a floating card capped at 520px. On screens under 420px tall, let it join the page instead of floating. The other option is keeping the full-width bar at one line tall.",
+        "where": "`test/broken.html:92`"
+      },
+      "covered:closed-landscape": {
+        "level": "pick",
+        "with": "bars:closed-landscape",
+        "fix": "Cleared by the cookie-notice change: on the short screen it no longer floats over the hero."
+      },
+      "covered:open-landscape": {
+        "level": "pick",
+        "with": "bars:closed-landscape",
+        "fix": "Cleared by the cookie-notice change: a 520px card at the bottom no longer reaches the download buttons."
+      },
+      "crease:a-lone:start-writing-free": {
+        "level": "you",
+        "question": "\"Start writing, free\" is centred alone, so on the open screen it sits on the crease. Add a second button, such as \"Take the tour\", so the gap between them lands on the crease? Or keep one button and move it to the left on wide screens?",
+        "fix": "A pair of equal buttons is the smaller change and reads better at every width, but it adds a call to action. That's a content decision, so it's yours.",
+        "where": "`test/broken.html:114`"
+      },
+      "grid:div-grid": {
+        "level": "pick",
+        "fix": "1 column, then 2 from 600px. Three cards in two columns leave one alone, so the third card spans both columns. The other option is adding a fourth card, which would be a content change.",
+        "where": "`test/broken.html:77`"
+      },
+      "vh:hero": {
+        "level": "safe",
+        "fix": "`min-height: 100vh` sets the hero's height on Open, tall, where Safari's 100vh is 35px taller than what's visible. Add `min-height: 100svh` after it, keeping 100vh as the fallback.",
+        "where": "`test/broken.html:44`"
+      },
+      "hover:menu-hover-sub": {
+        "level": "safe",
+        "fix": "Open \"More\" on tap: `:focus-within` and an `.is-open` class toggled on click, closing on Escape. Keep hover only inside `@media (hover: hover) and (pointer: fine)`.",
+        "where": "`test/broken.html:38`"
+      },
+      "insets:wrap": {
+        "level": "safe",
+        "fix": "Set each side from its own inset: `padding-left: max(20px, env(safe-area-inset-left))` and the same for the right.",
+        "where": "`test/broken.html:25`"
+      },
+      "top-inset:header": {
+        "level": "safe",
+        "fix": "Remove `padding-top: env(safe-area-inset-top)` from the header. The page doesn't draw under the status bar, and in-app browsers would turn this into a dead strip.",
+        "where": "`test/broken.html:29`"
+      },
+      "resize": {
+        "level": "safe",
+        "fix": "The width is read once at load, so the app preview's sidebar stays hidden after the device opens. Replace the script with a media query: hide the sidebar under 600px in CSS.",
+        "where": "`test/broken.html:96`, `test/broken.html:159`"
+      },
+      "ua": {
+        "level": "safe",
+        "with": "resize",
+        "fix": "Same script: it hides the nav for any user agent that says \"iPhone\", including the 951px open screen. Collapse the nav with a width media query instead.",
+        "where": "`test/broken.html:97`, `test/broken.html:161`"
+      },
+      "screen": {
+        "level": "safe",
+        "with": "resize",
+        "fix": "Same script: it hides the downloads when `screen.width` is under 600px, and on the simulator that stays at the closed value after opening. Hide them with a width media query instead.",
+        "where": "`test/broken.html:98`, `test/broken.html:162`"
+      }
+    },
+    "http://localhost:4173/edge.html": {
+      "crease-moving:a:ferro": {
+        "level": "you",
+        "question": "With reduced motion on, the customer logos stop with Ferro on the crease. Leave it, or show reduced-motion visitors a static grid of logos?",
+        "fix": "For everyone else the logos stream past the crease, which Apple allows. A static grid for reduced motion is a small change, but it's a different look for those visitors.",
+        "where": "`test/edge.html:50`"
+      },
+      "crease-h:button-feedback:feedback": {
+        "level": "pick",
+        "fix": "Move the Feedback tab from halfway down to 70% down (`top: 70%`), so it clears the fold on Open, tall. The other option is a round button in the bottom-right corner. The fold's height on this pose is estimated, so check it in Safari.",
+        "where": "`test/edge.html:77`"
+      },
+      "cover": {
+        "level": "safe",
+        "fix": "Drop `viewport-fit=cover`. The page doesn't draw under system UI and uses no safe-area insets, so it gains nothing from it.",
+        "where": "`test/edge.html:8`"
+      },
+      "cutoff:div-release-strip": {
+        "level": "leave",
+        "fix": "A deliberate bleed: the release chips run off the right edge to say there's more. They're labels, not controls, and nothing scrolls."
+      },
+      "overlay:div-grain": {
+        "level": "leave",
+        "fix": "A film-grain texture over the page at 7% opacity. It ignores taps (`pointer-events: none`) and has nothing to close."
+      }
+    }
+  }
+}

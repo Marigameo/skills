@@ -1,0 +1,1088 @@
+{
+  "ran": "2026-10-30",
+  "engine": "webkit",
+  "version": "27.2",
+  "poses": "2026-10-27",
+  "intro": "Ran 2026-10-30 in Playwright WebKit 27.2 at the viewports WebKit published for Safari 27.1 (`poses.json`, collected 2026-10-27). This is emulation: the right engine family and sizes, not Safari 27.1 itself. Confirm in Safari before calling it done (`duo-simulator.sh`, or a device). Pages are measured with reduced motion on, so animations are stopped where the page's reduced-motion styles leave them.",
+  "report": [
+    {
+      "url": "http://localhost:4173/broken.html",
+      "poses": [
+        {
+          "id": "closed-portrait",
+          "label": "Closed",
+          "w": 382,
+          "h": 580,
+          "sideways": true,
+          "cutoff": false,
+          "share": 32,
+          "vhSets": [
+            false
+          ],
+          "shot": "shots/localhost-broken-html-closed-portrait.jpg"
+        },
+        {
+          "id": "closed-landscape",
+          "label": "Closed, wide",
+          "w": 594,
+          "h": 368,
+          "sideways": false,
+          "cutoff": false,
+          "share": 50,
+          "vhSets": [
+            false
+          ],
+          "shot": "shots/localhost-broken-html-closed-landscape.jpg"
+        },
+        {
+          "id": "open-landscape",
+          "label": "Open",
+          "w": 951,
+          "h": 585,
+          "sideways": false,
+          "cutoff": false,
+          "share": 31,
+          "creaseHits": 1,
+          "creaseMoving": 0,
+          "vhSets": [
+            false
+          ],
+          "shot": "shots/localhost-broken-html-open-landscape.jpg"
+        },
+        {
+          "id": "open-portrait",
+          "label": "Open, tall",
+          "w": 669,
+          "h": 867,
+          "sideways": false,
+          "cutoff": false,
+          "share": 21,
+          "vhSets": [
+            true
+          ],
+          "shot": "shots/localhost-broken-html-open-portrait.jpg"
+        },
+        {
+          "id": "split-view",
+          "label": "Split View",
+          "w": 385,
+          "h": 571,
+          "sideways": true,
+          "cutoff": false,
+          "share": 32,
+          "vhSets": [
+            false
+          ],
+          "shot": "shots/localhost-broken-html-split-view.jpg"
+        }
+      ],
+      "findings": [
+        {
+          "sev": "fix",
+          "id": "sideways",
+          "title": "Scrolls sideways",
+          "pose": "closed-portrait",
+          "detail": {
+            "width": 444,
+            "offenders": [
+              {
+                "sel": "figure.app-shot",
+                "right": 444,
+                "width": 420,
+                "shot": "shots/localhost-broken-html-closed-portrait-sideways-1.jpg"
+              }
+            ]
+          }
+        },
+        {
+          "sev": "check",
+          "id": "background",
+          "title": "Page background doesn't match the page at the edge",
+          "pose": "closed-portrait",
+          "detail": {
+            "pageBg": [
+              17,
+              17,
+              17
+            ],
+            "edge": [
+              [
+                250,
+                248,
+                243
+              ],
+              [
+                250,
+                248,
+                243
+              ],
+              [
+                24,
+                22,
+                15
+              ]
+            ],
+            "shot": "shots/localhost-broken-html-closed-portrait-background.jpg"
+          }
+        },
+        {
+          "sev": "fix",
+          "id": "bars",
+          "title": "Fixed bars take too much of the screen",
+          "pose": "closed-landscape",
+          "detail": {
+            "share": 50,
+            "bars": [
+              {
+                "sel": "header.wrap",
+                "x": 0,
+                "y": 0,
+                "h": 64,
+                "w": 594,
+                "tag": "header"
+              },
+              {
+                "sel": "div.banner",
+                "x": 0,
+                "y": 248,
+                "h": 120,
+                "w": 594,
+                "tag": "div"
+              }
+            ],
+            "shot": "shots/localhost-broken-html-closed-landscape-bars.jpg"
+          }
+        },
+        {
+          "sev": "fix",
+          "id": "covered",
+          "title": "Fixed bars cover controls",
+          "pose": "closed-landscape",
+          "detail": {
+            "covered": [
+              {
+                "sel": "a.lone",
+                "text": "Start writing, free",
+                "by": "div.banner"
+              }
+            ],
+            "shot": "shots/localhost-broken-html-closed-landscape-covered.jpg"
+          }
+        },
+        {
+          "sev": "fix",
+          "id": "crease",
+          "title": "Controls on the crease",
+          "pose": "open-landscape",
+          "detail": {
+            "x": 475.5,
+            "hits": [
+              {
+                "sel": "a.lone",
+                "text": "Start writing, free",
+                "from": 376,
+                "to": 576,
+                "pageY": 401,
+                "frame": "",
+                "shot": "shots/localhost-broken-html-open-landscape-crease-1.jpg"
+              }
+            ]
+          }
+        },
+        {
+          "sev": "check",
+          "id": "grid",
+          "title": "Grid with a column on the crease",
+          "pose": "open-landscape",
+          "detail": {
+            "grids": [
+              {
+                "sel": "div.grid",
+                "columns": 3,
+                "shot": "shots/localhost-broken-html-open-landscape-grid-1.jpg"
+              }
+            ]
+          }
+        },
+        {
+          "sev": "fix",
+          "id": "covered",
+          "title": "Fixed bars cover controls",
+          "pose": "open-landscape",
+          "detail": {
+            "covered": [
+              {
+                "sel": "button",
+                "text": "macOS",
+                "by": "div.banner"
+              },
+              {
+                "sel": "button",
+                "text": "Windows",
+                "by": "div.banner"
+              },
+              {
+                "sel": "button",
+                "text": "Linux",
+                "by": "div.banner"
+              }
+            ],
+            "shot": "shots/localhost-broken-html-open-landscape-covered.jpg"
+          }
+        },
+        {
+          "sev": "fix",
+          "id": "sideways",
+          "title": "Scrolls sideways",
+          "pose": "split-view",
+          "detail": {
+            "width": 444,
+            "offenders": [
+              {
+                "sel": "figure.app-shot",
+                "right": 444,
+                "width": 420,
+                "shot": null
+              }
+            ]
+          }
+        },
+        {
+          "sev": "check",
+          "id": "vh",
+          "title": "Heights in vh",
+          "pose": null,
+          "detail": {
+            "selectors": [
+              ".hero"
+            ],
+            "elsewhere": 0,
+            "sets": [
+              [
+                "Open, tall"
+              ]
+            ]
+          }
+        },
+        {
+          "sev": "check",
+          "id": "hover",
+          "title": "Content revealed on hover only",
+          "pose": null,
+          "detail": {
+            "selectors": [
+              ".menu:hover > .sub"
+            ],
+            "elsewhere": 0
+          }
+        },
+        {
+          "sev": "check",
+          "id": "insets",
+          "title": "Safe-area insets applied to both sides from one edge",
+          "pose": null,
+          "detail": {
+            "selectors": [
+              ".wrap"
+            ],
+            "elsewhere": 0
+          }
+        },
+        {
+          "sev": "check",
+          "id": "top-inset",
+          "title": "Fixed header padded by safe-area-inset-top",
+          "pose": null,
+          "detail": {
+            "selectors": [
+              "header"
+            ],
+            "elsewhere": 0
+          }
+        },
+        {
+          "sev": "fix",
+          "id": "resize",
+          "title": "Layout after opening differs from a fresh load at the open size",
+          "pose": "open-landscape",
+          "detail": {
+            "changed": true,
+            "moved": 0,
+            "missing": 7,
+            "extra": 3,
+            "dh": 5,
+            "examples": [],
+            "noisy": false,
+            "shots": [
+              {
+                "label": "Fresh load at Open",
+                "src": "shots/localhost-broken-html-fresh.jpg"
+              },
+              {
+                "label": "Loaded closed, then opened",
+                "src": "shots/localhost-broken-html-opened.jpg"
+              }
+            ]
+          }
+        },
+        {
+          "sev": "check",
+          "id": "ua",
+          "title": "Layout differs between the iPhone and Mac user agents at the same size",
+          "pose": "open-landscape",
+          "detail": {
+            "changed": true,
+            "moved": 0,
+            "missing": 0,
+            "extra": 5,
+            "dh": 0,
+            "examples": [],
+            "noisy": false,
+            "shots": [
+              {
+                "label": "iPhone user agent",
+                "src": "shots/localhost-broken-html-fresh.jpg"
+              },
+              {
+                "label": "Mac user agent",
+                "src": "shots/localhost-broken-html-mac-ua.jpg"
+              }
+            ]
+          }
+        },
+        {
+          "sev": "fix",
+          "id": "screen",
+          "title": "Layout depends on screen.width, which stays at the closed size after opening",
+          "pose": "open-landscape",
+          "detail": {
+            "changed": true,
+            "moved": 4,
+            "missing": 3,
+            "extra": 3,
+            "dh": 5,
+            "examples": [
+              "BUTTON:Q3 pricing",
+              "BUTTON:Onboarding v2",
+              "BUTTON:Mobile nav",
+              "BUTTON:Brand refresh"
+            ],
+            "noisy": false,
+            "shots": [
+              {
+                "label": "screen.width at the open size",
+                "src": "shots/localhost-broken-html-fresh.jpg"
+              },
+              {
+                "label": "screen.width at the closed size",
+                "src": "shots/localhost-broken-html-stale-screen.jpg"
+              }
+            ]
+          }
+        }
+      ],
+      "failed": "",
+      "noisy": false,
+      "elsewhere": {
+        "vh": 0,
+        "hoverOnly": 0,
+        "insets": 0,
+        "topInset": 0,
+        "animated": 0
+      },
+      "items": [
+        {
+          "key": "sideways:figure-app-shot",
+          "check": "sideways",
+          "sev": "fix",
+          "title": "Scrolls sideways",
+          "poses": [
+            {
+              "id": "closed-portrait",
+              "label": "Closed"
+            },
+            {
+              "id": "split-view",
+              "label": "Split View"
+            }
+          ],
+          "subject": "`figure.app-shot`",
+          "lines": [
+            "reaches x = 444, 62px past the 382 wide edge (420px wide)",
+            "Split View: reaches x = 444, 59px past the 385 wide edge (420px wide)"
+          ],
+          "shot": "shots/localhost-broken-html-closed-portrait-sideways-1.jpg",
+          "shots": [],
+          "swatches": null
+        },
+        {
+          "key": "background",
+          "check": "background",
+          "sev": "check",
+          "title": "Page background doesn't match the page at the edge",
+          "poses": [
+            {
+              "id": "closed-portrait",
+              "label": "Closed"
+            }
+          ],
+          "subject": "",
+          "lines": [
+            "page background rgb(17, 17, 17); at the right edge: rgb(250, 248, 243), rgb(250, 248, 243), rgb(24, 22, 15)"
+          ],
+          "shot": "shots/localhost-broken-html-closed-portrait-background.jpg",
+          "shots": [],
+          "swatches": {
+            "page": [
+              17,
+              17,
+              17
+            ],
+            "edge": [
+              [
+                250,
+                248,
+                243
+              ],
+              [
+                250,
+                248,
+                243
+              ],
+              [
+                24,
+                22,
+                15
+              ]
+            ]
+          }
+        },
+        {
+          "key": "bars:closed-landscape",
+          "check": "bars",
+          "sev": "fix",
+          "title": "Fixed bars take too much of the screen",
+          "poses": [
+            {
+              "id": "closed-landscape",
+              "label": "Closed, wide"
+            }
+          ],
+          "subject": "",
+          "lines": [
+            "50% of the 368px height",
+            "`header.wrap` 64px tall at y 0",
+            "`div.banner` 120px tall at y 248"
+          ],
+          "shot": "shots/localhost-broken-html-closed-landscape-bars.jpg",
+          "shots": [],
+          "swatches": null
+        },
+        {
+          "key": "covered:closed-landscape",
+          "check": "covered",
+          "sev": "fix",
+          "title": "Fixed bars cover controls",
+          "poses": [
+            {
+              "id": "closed-landscape",
+              "label": "Closed, wide"
+            }
+          ],
+          "subject": "",
+          "lines": [
+            "`a.lone` \"Start writing, free\" under `div.banner`"
+          ],
+          "shot": "shots/localhost-broken-html-closed-landscape-covered.jpg",
+          "shots": [],
+          "swatches": null
+        },
+        {
+          "key": "crease:a-lone:start-writing-free",
+          "check": "crease",
+          "sev": "fix",
+          "title": "Controls on the crease",
+          "poses": [
+            {
+              "id": "open-landscape",
+              "label": "Open"
+            }
+          ],
+          "subject": "`a.lone` \"Start writing, free\"",
+          "lines": [
+            "200px wide, spans x 376–576; the crease is at x = 475.5"
+          ],
+          "shot": "shots/localhost-broken-html-open-landscape-crease-1.jpg",
+          "shots": [],
+          "swatches": null
+        },
+        {
+          "key": "grid:div-grid",
+          "check": "grid",
+          "sev": "check",
+          "title": "Grid with a column on the crease",
+          "poses": [
+            {
+              "id": "open-landscape",
+              "label": "Open"
+            }
+          ],
+          "subject": "`div.grid`",
+          "lines": [
+            "3 equal columns; the middle one sits on the crease"
+          ],
+          "shot": "shots/localhost-broken-html-open-landscape-grid-1.jpg",
+          "shots": [],
+          "swatches": null
+        },
+        {
+          "key": "covered:open-landscape",
+          "check": "covered",
+          "sev": "fix",
+          "title": "Fixed bars cover controls",
+          "poses": [
+            {
+              "id": "open-landscape",
+              "label": "Open"
+            }
+          ],
+          "subject": "",
+          "lines": [
+            "`button` \"macOS\" under `div.banner`",
+            "`button` \"Windows\" under `div.banner`",
+            "`button` \"Linux\" under `div.banner`"
+          ],
+          "shot": "shots/localhost-broken-html-open-landscape-covered.jpg",
+          "shots": [],
+          "swatches": null
+        },
+        {
+          "key": "vh:hero",
+          "check": "vh",
+          "sev": "check",
+          "title": "Heights in vh",
+          "poses": [],
+          "subject": "`.hero`",
+          "lines": [
+            "sets the element's height at: Open, tall"
+          ],
+          "shot": null,
+          "shots": [],
+          "swatches": null
+        },
+        {
+          "key": "hover:menu-hover-sub",
+          "check": "hover",
+          "sev": "check",
+          "title": "Content revealed on hover only",
+          "poses": [],
+          "subject": "`.menu:hover > .sub`",
+          "lines": [],
+          "shot": null,
+          "shots": [],
+          "swatches": null
+        },
+        {
+          "key": "insets:wrap",
+          "check": "insets",
+          "sev": "check",
+          "title": "Safe-area insets applied to both sides from one edge",
+          "poses": [],
+          "subject": "`.wrap`",
+          "lines": [],
+          "shot": null,
+          "shots": [],
+          "swatches": null
+        },
+        {
+          "key": "top-inset:header",
+          "check": "top-inset",
+          "sev": "check",
+          "title": "Fixed header padded by safe-area-inset-top",
+          "poses": [],
+          "subject": "`header`",
+          "lines": [],
+          "shot": null,
+          "shots": [],
+          "swatches": null
+        },
+        {
+          "key": "resize",
+          "check": "resize",
+          "sev": "fix",
+          "title": "Layout after opening differs from a fresh load at the open size",
+          "poses": [
+            {
+              "id": "open-landscape",
+              "label": "Open"
+            }
+          ],
+          "subject": "",
+          "lines": [
+            "0 controls moved, 7 missing, 3 extra; page height differs by 5%"
+          ],
+          "shot": null,
+          "shots": [
+            {
+              "label": "Fresh load at Open",
+              "src": "shots/localhost-broken-html-fresh.jpg"
+            },
+            {
+              "label": "Loaded closed, then opened",
+              "src": "shots/localhost-broken-html-opened.jpg"
+            }
+          ],
+          "swatches": null
+        },
+        {
+          "key": "ua",
+          "check": "ua",
+          "sev": "check",
+          "title": "Layout differs between the iPhone and Mac user agents at the same size",
+          "poses": [
+            {
+              "id": "open-landscape",
+              "label": "Open"
+            }
+          ],
+          "subject": "",
+          "lines": [
+            "0 controls moved, 0 missing, 5 extra; page height differs by 0%"
+          ],
+          "shot": null,
+          "shots": [
+            {
+              "label": "iPhone user agent",
+              "src": "shots/localhost-broken-html-fresh.jpg"
+            },
+            {
+              "label": "Mac user agent",
+              "src": "shots/localhost-broken-html-mac-ua.jpg"
+            }
+          ],
+          "swatches": null
+        },
+        {
+          "key": "screen",
+          "check": "screen",
+          "sev": "fix",
+          "title": "Layout depends on screen.width, which stays at the closed size after opening",
+          "poses": [
+            {
+              "id": "open-landscape",
+              "label": "Open"
+            }
+          ],
+          "subject": "",
+          "lines": [
+            "4 controls moved, 3 missing, 3 extra; page height differs by 5%",
+            "e.g. `BUTTON:Q3 pricing`, `BUTTON:Onboarding v2`, `BUTTON:Mobile nav`, `BUTTON:Brand refresh`"
+          ],
+          "shot": null,
+          "shots": [
+            {
+              "label": "screen.width at the open size",
+              "src": "shots/localhost-broken-html-fresh.jpg"
+            },
+            {
+              "label": "screen.width at the closed size",
+              "src": "shots/localhost-broken-html-stale-screen.jpg"
+            }
+          ],
+          "swatches": null
+        }
+      ]
+    },
+    {
+      "url": "http://localhost:4173/edge.html",
+      "poses": [
+        {
+          "id": "closed-portrait",
+          "label": "Closed",
+          "w": 382,
+          "h": 580,
+          "sideways": false,
+          "cutoff": true,
+          "share": 12,
+          "shot": "shots/localhost-edge-html-closed-portrait.jpg"
+        },
+        {
+          "id": "closed-landscape",
+          "label": "Closed, wide",
+          "w": 594,
+          "h": 368,
+          "sideways": false,
+          "cutoff": true,
+          "share": 18,
+          "shot": "shots/localhost-edge-html-closed-landscape.jpg"
+        },
+        {
+          "id": "open-landscape",
+          "label": "Open",
+          "w": 951,
+          "h": 585,
+          "sideways": false,
+          "cutoff": true,
+          "share": 11,
+          "creaseHits": 0,
+          "creaseMoving": 1,
+          "shot": "shots/localhost-edge-html-open-landscape.jpg"
+        },
+        {
+          "id": "open-portrait",
+          "label": "Open, tall",
+          "w": 669,
+          "h": 867,
+          "sideways": false,
+          "cutoff": true,
+          "share": 7,
+          "shot": "shots/localhost-edge-html-open-portrait.jpg"
+        },
+        {
+          "id": "split-view",
+          "label": "Split View",
+          "w": 385,
+          "h": 571,
+          "sideways": false,
+          "cutoff": true,
+          "share": 12,
+          "shot": "shots/localhost-edge-html-split-view.jpg"
+        }
+      ],
+      "findings": [
+        {
+          "sev": "check",
+          "id": "cutoff",
+          "title": "Cut off at the edge (the page clips sideways, so it doesn't scroll)",
+          "pose": "closed-portrait",
+          "detail": {
+            "width": 406,
+            "offenders": [
+              {
+                "sel": "div.release-strip",
+                "right": 406,
+                "width": 382,
+                "shot": "shots/localhost-edge-html-closed-portrait-cutoff-1.jpg"
+              }
+            ]
+          }
+        },
+        {
+          "sev": "check",
+          "id": "overlay",
+          "title": "A full-screen overlay is open on load",
+          "pose": "closed-portrait",
+          "detail": {
+            "overlays": [
+              "div.grain"
+            ],
+            "sel": "div.grain",
+            "shot": "shots/localhost-edge-html-closed-portrait-overlay.jpg"
+          }
+        },
+        {
+          "sev": "check",
+          "id": "cutoff",
+          "title": "Cut off at the edge (the page clips sideways, so it doesn't scroll)",
+          "pose": "closed-landscape",
+          "detail": {
+            "width": 618,
+            "offenders": [
+              {
+                "sel": "div.release-strip",
+                "right": 618,
+                "width": 594,
+                "shot": null
+              }
+            ]
+          }
+        },
+        {
+          "sev": "check",
+          "id": "overlay",
+          "title": "A full-screen overlay is open on load",
+          "pose": "closed-landscape",
+          "detail": {
+            "overlays": [
+              "div.grain"
+            ],
+            "sel": "div.grain",
+            "shot": null
+          }
+        },
+        {
+          "sev": "check",
+          "id": "cutoff",
+          "title": "Cut off at the edge (the page clips sideways, so it doesn't scroll)",
+          "pose": "open-landscape",
+          "detail": {
+            "width": 975,
+            "offenders": [
+              {
+                "sel": "div.release-strip",
+                "right": 975,
+                "width": 951,
+                "shot": null
+              }
+            ]
+          }
+        },
+        {
+          "sev": "check",
+          "id": "crease-moving",
+          "title": "Moving controls on the crease, measured where reduced motion stops them",
+          "pose": "open-landscape",
+          "detail": {
+            "x": 475.5,
+            "hits": [
+              {
+                "sel": "a",
+                "text": "Ferro",
+                "from": 344,
+                "to": 484,
+                "pageY": 580,
+                "frame": "",
+                "shot": "shots/localhost-edge-html-open-landscape-crease-moving-1.jpg"
+              }
+            ]
+          }
+        },
+        {
+          "sev": "check",
+          "id": "overlay",
+          "title": "A full-screen overlay is open on load",
+          "pose": "open-landscape",
+          "detail": {
+            "overlays": [
+              "div.grain"
+            ],
+            "sel": "div.grain",
+            "shot": null
+          }
+        },
+        {
+          "sev": "check",
+          "id": "cutoff",
+          "title": "Cut off at the edge (the page clips sideways, so it doesn't scroll)",
+          "pose": "open-portrait",
+          "detail": {
+            "width": 693,
+            "offenders": [
+              {
+                "sel": "div.release-strip",
+                "right": 693,
+                "width": 669,
+                "shot": null
+              }
+            ]
+          }
+        },
+        {
+          "sev": "check",
+          "id": "crease-h",
+          "title": "Fixed controls on the crease (open, tall; its height is estimated)",
+          "pose": "open-portrait",
+          "detail": {
+            "y": 426.5,
+            "hits": [
+              {
+                "sel": "button.feedback",
+                "text": "Feedback",
+                "shot": "shots/localhost-edge-html-open-portrait-crease-h-1.jpg"
+              }
+            ]
+          }
+        },
+        {
+          "sev": "check",
+          "id": "overlay",
+          "title": "A full-screen overlay is open on load",
+          "pose": "open-portrait",
+          "detail": {
+            "overlays": [
+              "div.grain"
+            ],
+            "sel": "div.grain",
+            "shot": null
+          }
+        },
+        {
+          "sev": "check",
+          "id": "cutoff",
+          "title": "Cut off at the edge (the page clips sideways, so it doesn't scroll)",
+          "pose": "split-view",
+          "detail": {
+            "width": 409,
+            "offenders": [
+              {
+                "sel": "div.release-strip",
+                "right": 409,
+                "width": 385,
+                "shot": null
+              }
+            ]
+          }
+        },
+        {
+          "sev": "check",
+          "id": "overlay",
+          "title": "A full-screen overlay is open on load",
+          "pose": "split-view",
+          "detail": {
+            "overlays": [
+              "div.grain"
+            ],
+            "sel": "div.grain",
+            "shot": null
+          }
+        },
+        {
+          "sev": "check",
+          "id": "cover",
+          "title": "viewport-fit=cover with no safe-area insets",
+          "pose": null,
+          "detail": {}
+        }
+      ],
+      "failed": "",
+      "noisy": false,
+      "elsewhere": {
+        "vh": 1,
+        "hoverOnly": 0,
+        "insets": 0,
+        "topInset": 0,
+        "animated": 0
+      },
+      "items": [
+        {
+          "key": "cutoff:div-release-strip",
+          "check": "cutoff",
+          "sev": "check",
+          "title": "Cut off at the edge (the page clips sideways, so it doesn't scroll)",
+          "poses": [
+            {
+              "id": "closed-portrait",
+              "label": "Closed"
+            },
+            {
+              "id": "closed-landscape",
+              "label": "Closed, wide"
+            },
+            {
+              "id": "open-landscape",
+              "label": "Open"
+            },
+            {
+              "id": "open-portrait",
+              "label": "Open, tall"
+            },
+            {
+              "id": "split-view",
+              "label": "Split View"
+            }
+          ],
+          "subject": "`div.release-strip`",
+          "lines": [
+            "reaches x = 406, 24px past the 382 wide edge (382px wide)",
+            "Closed, wide: reaches x = 618, 24px past the 594 wide edge (594px wide)",
+            "Open: reaches x = 975, 24px past the 951 wide edge (951px wide)",
+            "Open, tall: reaches x = 693, 24px past the 669 wide edge (669px wide)",
+            "Split View: reaches x = 409, 24px past the 385 wide edge (385px wide)"
+          ],
+          "shot": "shots/localhost-edge-html-closed-portrait-cutoff-1.jpg",
+          "shots": [],
+          "swatches": null
+        },
+        {
+          "key": "overlay:div-grain",
+          "check": "overlay",
+          "sev": "check",
+          "title": "A full-screen overlay is open on load",
+          "poses": [
+            {
+              "id": "closed-portrait",
+              "label": "Closed"
+            },
+            {
+              "id": "closed-landscape",
+              "label": "Closed, wide"
+            },
+            {
+              "id": "open-landscape",
+              "label": "Open"
+            },
+            {
+              "id": "open-portrait",
+              "label": "Open, tall"
+            },
+            {
+              "id": "split-view",
+              "label": "Split View"
+            }
+          ],
+          "subject": "`div.grain`",
+          "lines": [
+            "covers more than 85% of the screen at load",
+            "Closed, wide: covers more than 85% of the screen at load",
+            "Open: covers more than 85% of the screen at load",
+            "Open, tall: covers more than 85% of the screen at load",
+            "Split View: covers more than 85% of the screen at load"
+          ],
+          "shot": "shots/localhost-edge-html-closed-portrait-overlay.jpg",
+          "shots": [],
+          "swatches": null
+        },
+        {
+          "key": "crease-moving:a:ferro",
+          "check": "crease-moving",
+          "sev": "check",
+          "title": "Moving controls on the crease, measured where reduced motion stops them",
+          "poses": [
+            {
+              "id": "open-landscape",
+              "label": "Open"
+            }
+          ],
+          "subject": "`a` \"Ferro\"",
+          "lines": [
+            "140px wide, spans x 344–484; the crease is at x = 475.5"
+          ],
+          "shot": "shots/localhost-edge-html-open-landscape-crease-moving-1.jpg",
+          "shots": [],
+          "swatches": null
+        },
+        {
+          "key": "crease-h:button-feedback:feedback",
+          "check": "crease-h",
+          "sev": "check",
+          "title": "Fixed controls on the crease (open, tall; its height is estimated)",
+          "poses": [
+            {
+              "id": "open-portrait",
+              "label": "Open, tall"
+            }
+          ],
+          "subject": "`button.feedback` \"Feedback\"",
+          "lines": [
+            "crosses the line at y ≈ 426.5"
+          ],
+          "shot": "shots/localhost-edge-html-open-portrait-crease-h-1.jpg",
+          "shots": [],
+          "swatches": null
+        },
+        {
+          "key": "cover",
+          "check": "cover",
+          "sev": "check",
+          "title": "viewport-fit=cover with no safe-area insets",
+          "poses": [],
+          "subject": "",
+          "lines": [],
+          "shot": null,
+          "shots": [],
+          "swatches": null
+        }
+      ]
+    }
+  ]
+}

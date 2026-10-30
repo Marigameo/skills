@@ -1,57 +1,181 @@
 <!doctype html>
-<!-- Self-test page: broken.html with every problem fixed the way FIXES.md recommends. duo-audit should find nothing. -->
+<!-- Self-test page: broken.html done right, each fix the way FIXES.md recommends. duo-audit should find nothing.
+     Self-contained: no fonts, images or scripts from anywhere else, so the self-test runs offline. -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Fixed</title>
+<meta name="color-scheme" content="light dark">
+<title>Margin · Decisions, written down</title>
 <style>
+  :root {
+    color-scheme: light dark;
+    --paper: light-dark(#faf8f3, #1c1b18); --surface: light-dark(#ffffff, #262521); --sunk: light-dark(#f2efe7, #161512);
+    --ink: light-dark(#18160f, #f4f1e8); --muted: light-dark(#65615a, #aaa59a); --line: light-dark(#e6e1d5, #36342e);
+    --accent: light-dark(#c2552d, #e07a52); --accent-soft: light-dark(#f7e5db, #43291d); --sage: light-dark(#4f6f58, #94b89c);
+    --serif: ui-serif, "Iowan Old Style", Charter, Georgia, serif;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, Helvetica, Arial, sans-serif;
+    --mono: ui-monospace, "SF Mono", Menlo, monospace;
+  }
   * { box-sizing: border-box; }
-  html, body { margin: 0; background: #f6f4ee; }                                  /* background: the page's own colour */
-  body { font: 16px/1.5 system-ui, sans-serif; color: #111; }
-  header { position: sticky; top: 0; height: 56px; background: #fff; display: flex; align-items: center; justify-content: space-between;
-           padding-left: max(16px, env(safe-area-inset-left)); padding-right: max(16px, env(safe-area-inset-right)); }
-  .links a { margin-left: 12px; }
+  html, body { background: var(--paper); }                                      /* the page's own colour, so Safari's column matches */
+  body { margin: 0; font: 16px/1.55 var(--sans); color: var(--ink); -webkit-font-smoothing: antialiased; }
+  a { color: inherit; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
+  .wrap { padding-left: max(20px, env(safe-area-inset-left)); padding-right: max(20px, env(safe-area-inset-right)); }   /* each side from its own inset */
+
+  header { position: sticky; top: 0; z-index: 10; height: 60px;
+           background: color-mix(in srgb, var(--paper) 90%, transparent); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+           border-bottom: 1px solid var(--line); }
+  .bar { height: 100%; max-width: 1080px; margin-inline: auto; display: flex; align-items: center; justify-content: space-between; }
+  .inner { max-width: 1080px; margin-inline: auto; }
+  .mark { display: inline-flex; align-items: center; gap: 10px; font: 600 21px/1 var(--serif); letter-spacing: -.01em; text-decoration: none; }
+  .mark i { width: 18px; height: 22px; border-radius: 3px; background: var(--surface); border: 1.5px solid var(--ink); box-shadow: inset 5px 0 0 -3.5px var(--accent); }
+  .links { display: flex; align-items: baseline; }
+  .links a { margin-left: 24px; font-size: 15px; color: var(--muted); text-decoration: none; }
+  .links a:hover { color: var(--ink); }
+  @media (max-width: 599px) { .links > a:not(:first-child) { display: none; } }
   .menu { position: relative; display: inline-block; }
-  .sub { display: none; position: absolute; top: 100%; right: 0; background: #fff; }
-  .menu:focus-within > .sub, .menu.open > .sub { display: block; }
-  @media (hover: hover) { .menu:hover > .sub { display: block; } }
-  .hero { min-height: 70vh; min-height: 70dvh; display: grid; place-items: center; text-align: center; padding: 24px; }
+  .sub { display: none; position: absolute; top: calc(100% + 10px); right: 0; min-width: 170px; padding: 6px; background: var(--surface);
+         border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 12px 32px -12px rgb(0 0 0 / .25); }
+  .menu:focus-within > .sub, .menu.is-open > .sub { display: block; }           /* opens on tap; hover is an extra */
+  @media (hover: hover) and (pointer: fine) { .menu:hover > .sub { display: block; } }
+  .sub a { display: block; margin: 0; padding: 8px 10px; border-radius: 8px; color: var(--ink); }
+  .sub a:hover { background: var(--sunk); }
+
+  .hero { min-height: 100vh; min-height: 100svh; display: grid; place-items: center; text-align: center; padding-block: 40px 64px; }   /* svh: what's visible with the bars */
   .hero > div { width: 100%; }   /* a shrink-wrapped box would wrap the pair onto two lines, each button alone on the centre */
+  .kicker { display: inline-flex; align-items: center; gap: 8px; font: 600 12px/1 var(--sans); letter-spacing: .08em; text-transform: uppercase;
+            color: var(--accent); background: var(--accent-soft); padding: 7px 12px; border-radius: 999px; }
+  .kicker b { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+  h1 { font: 500 clamp(36px, 6.6vw, 64px)/1.03 var(--serif); letter-spacing: -.025em; margin: 20px auto 16px; max-width: 13ch; text-wrap: balance; }
+  .lede { color: var(--muted); font-size: clamp(16px, 2vw, 19px); max-width: 44ch; margin: 0 auto 28px; text-wrap: pretty; }
+  /* Two buttons of equal width with the gap centred: on the open screen the gap, not a button, sits on the crease */
   .cta { display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; }
-  .cta a { flex: 0 1 180px; padding: 14px 0; background: #2b5; color: #fff; border-radius: 10px; text-decoration: none; }
-  .cta a + a { background: #fff; color: #111; border: 1px solid #ccc; }
-  .tools { display: flex; justify-content: center; gap: 8px; margin-top: 12px; }   /* an even row of equal buttons: the gap sits on the crease */
-  .tools button { flex: 0 0 88px; }
-  .grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; padding: 24px; }
+  .cta a { flex: 0 1 200px; min-width: 0; display: inline-flex; align-items: center; justify-content: center; height: 50px; border-radius: 13px;
+           font-weight: 600; text-decoration: none; border: 1px solid var(--line); }
+  .cta a:first-child { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  /* Four equal downloads, so a gap sits on the crease; phones get the store, not desktop downloads (CSS, not a width read once) */
+  .get { margin: 22px 0 40px; }
+  .get p { margin: 0 0 10px; font-size: 13px; color: var(--muted); }
+  .tools { display: flex; justify-content: center; gap: 8px; }
+  .tools button { flex: 0 0 96px; padding: 7px 0; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: 500 13px var(--sans); }
+  @media (max-width: 599px) { .get { display: none; } .cta { margin-bottom: 36px; } }
+
+  .app-shot { width: 100%; max-width: 640px; margin: 0 auto; text-align: left; background: var(--surface); border: 1px solid var(--line); border-radius: 14px;
+              box-shadow: 0 30px 60px -30px rgb(40 30 10 / .35), 0 2px 6px rgb(40 30 10 / .06); overflow: hidden; }   /* fluid, with a cap */
+  .win-bar { display: flex; align-items: center; gap: 6px; height: 34px; padding: 0 12px; border-bottom: 1px solid var(--line); background: var(--sunk); }
+  .win-bar i { width: 10px; height: 10px; border-radius: 50%; background: var(--line); }
+  .win-bar span { margin-left: 10px; font: 500 12px var(--sans); color: var(--muted); }
+  .win-body { display: grid; grid-template-columns: 124px minmax(0, 1fr); min-height: 210px; }
+  .win-side { padding: 14px 10px; border-right: 1px solid var(--line); font-size: 12px; color: var(--muted); display: flex; flex-direction: column; gap: 4px; }
+  .win-side b { font: 600 10px/1 var(--sans); letter-spacing: .08em; text-transform: uppercase; margin: 0 6px 8px; }
+  .win-side button { padding: 6px; border: 0; border-radius: 6px; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+  .win-side .on { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+  .win-doc { padding: 18px 20px; min-width: 0; }
+  .doc-k { font: 600 10px/1 var(--sans); letter-spacing: .08em; text-transform: uppercase; color: var(--sage); margin: 0 0 8px; }
+  .doc-h { font: 500 19px/1.2 var(--serif); margin: 0 0 12px; }
+  .doc-l { height: 7px; border-radius: 4px; background: var(--sunk); margin: 0 0 8px; }
+  .doc-c { display: flex; gap: 8px; align-items: flex-start; margin-top: 14px; padding: 9px 10px; border-radius: 9px; background: var(--paper); border: 1px solid var(--line); font-size: 11.5px; color: var(--muted); }
+  .doc-c i { flex: none; width: 18px; height: 18px; border-radius: 50%; background: var(--sage); }
+
+  .features { padding-block: 72px; }
+  .eyebrow { font: 600 12px/1 var(--sans); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin: 0 0 12px; }
+  h2 { font: 500 clamp(28px, 4vw, 40px)/1.1 var(--serif); letter-spacing: -.02em; margin: 0 0 32px; max-width: 20ch; text-wrap: balance; }
+  /* Even columns: one, then two. The fold falls between cards, never through one */
+  .grid { display: grid; gap: 18px; grid-template-columns: minmax(0, 1fr); }
   @media (min-width: 600px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-  .card { background: #fff; padding: 16px; border-radius: 12px; }
-  .wide-thing { width: 100%; max-width: 420px; height: 40px; background: #fc6; margin: 0 auto; }
-  .banner { position: fixed; left: 12px; right: 12px; bottom: 12px; max-width: 520px; margin: 0 auto; background: #222; color: #fff; padding: 10px 14px; border-radius: 12px; }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 22px; }
+  .card svg { width: 26px; height: 26px; color: var(--accent); }
+  .card h3 { font: 600 17px/1.3 var(--sans); margin: 14px 0 6px; }
+  .card p { margin: 0 0 14px; color: var(--muted); font-size: 15px; }
+  .card a { font-weight: 600; font-size: 14px; color: var(--accent); text-decoration: none; }
+
+  .quote { margin: 0; padding-block: 24px 88px; }
+  .quote blockquote { margin: 0 auto; max-width: 30ch; font: 400 clamp(22px, 3vw, 30px)/1.3 var(--serif); letter-spacing: -.01em; text-align: center; text-wrap: balance; }
+  .quote figcaption { margin-top: 18px; text-align: center; color: var(--muted); font-size: 14px; }
+  .quote figcaption b { color: var(--ink); font-weight: 600; }
+
+  footer.wrap { border-top: 1px solid var(--line); padding-block: 28px 140px; font-size: 14px; color: var(--muted); }
+  footer .row { max-width: 1080px; margin-inline: auto; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; }
+
+  /* A floating card, not a full-width bar; on a short screen it joins the page instead of floating over it */
+  .banner { position: fixed; left: 12px; right: 12px; bottom: 12px; max-width: 520px; margin: 0 auto; padding: 12px 12px 12px 16px; border-radius: 14px;
+            background: var(--ink); color: var(--paper); font-size: 14px; display: flex; align-items: center; gap: 14px;
+            box-shadow: 0 18px 40px -18px rgb(0 0 0 / .45); }
+  .banner span { flex: 1; }
+  .banner button { flex: none; padding: 7px 14px; border-radius: 9px; border: 0; background: var(--paper); color: var(--ink); font: 600 13px var(--sans); }
   @media (max-height: 420px) { .banner { position: static; margin: 0 16px 16px; } }
-  @media (max-width: 599px) { .links a:not(:first-child) { display: none; } }
 </style>
 </head>
 <body>
-<header><strong>Fixed Co</strong>
-  <nav class="links"><a href="#a">Product</a><a href="#b">Pricing</a><a href="#c">Docs</a><a href="#d">Blog</a>
-    <span class="menu"><a href="#m">More</a><span class="sub"><a href="#s1">One</a><a href="#s2">Two</a></span></span></nav>
+<header class="wrap">
+  <div class="bar"><a class="mark" href="#top"><i></i>Margin</a>
+  <nav class="links" aria-label="Main">
+    <a href="#product">Product</a><a href="#pricing">Pricing</a><a href="#docs">Docs</a><a href="#blog">Blog</a>
+    <span class="menu"><a href="#more" aria-expanded="false">More</a><span class="sub"><a href="#changelog">Changelog</a><a href="#customers">Customers</a><a href="#careers">Careers</a></span></span>
+  </nav></div>
 </header>
-<main>
-  <section class="hero"><div>
-    <h1>Everything works here</h1>
-    <div class="cta"><a href="#buy">Buy now</a><a href="#tour">Take the tour</a></div>
-    <div class="tools"><button>Share</button><button>Save</button><button>Print</button><button>Copy</button></div>
-    <div class="wide-thing"></div>
+<main id="top">
+  <section class="hero wrap"><div>
+    <span class="kicker"><b></b>Margin 3.0 · Decision log</span>
+    <h1>Decisions, written down.</h1>
+    <p class="lede">Margin is where product teams write what they decided and why, so the next person doesn't have to ask.</p>
+    <div class="cta"><a href="#start">Start writing, free</a><a href="#tour">Take the tour</a></div>
+    <div class="get"><p>Get the app</p><div class="tools"><button>macOS</button><button>Windows</button><button>Linux</button><button>iPad</button></div></div>
+    <figure class="app-shot" aria-label="Margin's editor with a decision open">
+      <div class="win-bar"><i></i><i></i><i></i><span>Q3 pricing</span></div>
+      <div class="win-body">
+        <div class="win-side"><b>Decisions</b><button class="on">Q3 pricing</button><button>Onboarding v2</button><button>Mobile nav</button><button>Brand refresh</button></div>
+        <div class="win-doc">
+          <p class="doc-k">Decided · Oct 12</p>
+          <p class="doc-h">Free plan goes to three editors</p>
+          <div class="doc-l" style="width: 92%"></div><div class="doc-l" style="width: 78%"></div><div class="doc-l" style="width: 85%"></div>
+          <div class="doc-c"><i></i>Priya: agreed, and let's revisit after the October cohort.</div>
+        </div>
+      </div>
+    </figure>
   </div></section>
-  <section class="grid">
-    <div class="card"><h3>One</h3><a href="#1">Read one</a></div>
-    <div class="card"><h3>Two</h3><a href="#2">Read two</a></div>
-    <div class="card"><h3>Three</h3><a href="#3">Read three</a></div>
-    <div class="card"><h3>Four</h3><a href="#4">Read four</a></div>
+
+  <section class="features wrap" id="product">
+    <div class="inner">
+    <p class="eyebrow">Why teams switch</p>
+    <h2>Less re-deciding. More shipping.</h2>
+    <div class="grid">
+      <article class="card">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M5 4h10l4 4v12H5z"/><path d="M9 12h6M9 16h4"/></svg>
+        <h3>One page per decision</h3><p>What was decided, who agreed, and what would change it. Nothing else.</p><a href="#one">Read more</a>
+      </article>
+      <article class="card">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg>
+        <h3>Revisit on a date</h3><p>Every decision can carry a review date. Margin brings it back when it's due.</p><a href="#two">Read more</a>
+      </article>
+      <article class="card">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h10M4 18h6"/></svg>
+        <h3>Search that knows why</h3><p>Find the decision, the reasoning and the thread that led to it, in one place.</p><a href="#three">Read more</a>
+      </article>
+      <article class="card">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M5 5h14v10H9l-4 4z"/></svg>
+        <h3>Comments that close</h3><p>Threads end in a decision or an owner. Open questions don't quietly pile up.</p><a href="#four">Read more</a>
+      </article>
+    </div>
+    </div>
   </section>
+
+  <figure class="quote wrap">
+    <blockquote>"We stopped having the same meeting twice. That alone paid for it."</blockquote>
+    <figcaption><b>Priya Raman</b> · Head of Product, Halcyon</figcaption>
+  </figure>
 </main>
-<footer><p style="padding: 0 16px">Footer</p></footer>
-<div class="banner">We use cookies. <button>Accept</button></div>
+<footer class="wrap"><div class="row"><a class="mark" href="#top"><i></i>Margin</a><span>© 2026 Margin Labs. Made for teams who write things down.</span></div></footer>
+<div class="banner"><span>We use cookies to understand which pages help. Nothing is sold, ever.</span><button>Accept</button></div>
+<script>
+  // The menu opens on tap and closes on Escape or a tap elsewhere. Nothing here reads the window's size.
+  const menu = document.querySelector('.menu'), trigger = menu.querySelector('a');
+  const set = (open) => { menu.classList.toggle('is-open', open); trigger.setAttribute('aria-expanded', String(open)); };
+  trigger.addEventListener('click', (e) => { e.preventDefault(); set(!menu.classList.contains('is-open')); });
+  document.addEventListener('click', (e) => { if (!menu.contains(e.target)) set(false); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') set(false); });
+</script>
 </body>
 </html>

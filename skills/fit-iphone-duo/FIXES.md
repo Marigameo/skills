@@ -19,6 +19,8 @@ pre, table { max-width: 100%; overflow-x: auto; }
 
 A fixed width (`width: 420px`) becomes `width: 100%; max-width: 420px`. A `100vw` element becomes `100%`, because `vw` includes the scrollbar gutter on some browsers.
 
+**Cut off at the edge** (`cutoff`) means the page already clips sideways (`overflow-x: clip` on `body`), so nothing scrolls. Look at what's cut off. A decorative bleed can stay. Text, a control, or a doodle sliced in half at one width should fit inside the page there, with the same fixes as above, or be hidden where it can't fit.
+
 ## Controls on the crease
 
 On the open screen the fold runs down the centre. Small controls there are hard to tap when the device is partly folded. Text, images and wide rows may cross it. In order of preference:
@@ -44,6 +46,8 @@ On the open screen the fold runs down the centre. Small controls there are hard 
      .hero-buy { transform: translateX(calc(50% + 24px)); }
    }
    ```
+
+**Moving controls** (`crease-moving`: a marquee, an autoplaying carousel) cross the fold the way scrolling content does, so moving they're fine. Look at where they stop under reduced motion. If a link lands on the crease there, give the reduced-motion version a static layout of its own (wrapped, or an even row), or make the items not links when they don't need to be.
 
 Re-run the audit. A fix that moves a control off the crease at 951 shouldn't push it onto something else.
 

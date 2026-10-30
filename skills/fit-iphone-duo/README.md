@@ -12,7 +12,13 @@ It's for websites and web apps. Native iOS apps get Apple's own APIs and need a 
 npx skills@latest add marigameo/skills
 ```
 
-Then ask your coding agent to "make my site work on iPhone Duo". It starts at [SKILL.md](SKILL.md). The audit needs Playwright with WebKit (`npm i -D playwright && npx playwright install webkit`). The Safari check at the end needs Xcode 27.1 on a Mac, and skips cleanly without it.
+Then ask your coding agent to "make my site work on iPhone Duo". It starts at [SKILL.md](SKILL.md). You get `duo-report/duo-report.html`: every finding with a picture where there's something to see, sorted into what needs your answer, what the agent will pick, what's a safe fix and what to leave. Reply "go" and the agent makes the safe fixes and its picks; it waits for your answers on the rest. The audit needs Playwright with WebKit (`npm i -D playwright && npx playwright install webkit`). The Safari check at the end needs Xcode 27.1 on a Mac, and skips cleanly without it.
+
+## What the report looks like
+
+A [sample report](sample-report/) for two pages of the test site: the plan at the top, the levels, the five poses, then a card per item with the crease drawn and the element outlined.
+
+[![The sample report: the plan, the level tiles, the five poses and the first card](sample-report/preview.jpg)](sample-report/)
 
 ## What's inside
 
@@ -22,9 +28,11 @@ Then ask your coding agent to "make my site work on iPhone Duo". It starts at [S
 | [CHECKS.md](CHECKS.md) | What the audit measures, its thresholds and where each comes from |
 | [FIXES.md](FIXES.md) | A fix at the cause for every finding, with code |
 | `duo-audit.mjs` | The audit: WebKit, five poses, the crease, the CSS, and behaviour when the page resizes |
+| `duo-report.mjs` | The report you read: a card per item with an annotated screenshot, sorted into Needs you, My pick, Safe fix and Leave, and a plan that says what "go" will do |
 | `duo-simulator.sh` | An optional last look in real Safari on Xcode's iPhone Duo simulator |
 | `poses.json` | The viewport numbers, shared with the playground |
-| `test/` | A broken page, a fixed page and a self-test that proves every check catches what it should |
+| `test/` | Margin, a made-up writing app: its home page with every problem planted, the same page fixed, and its customers page of judgement calls. The self-test proves every check catches what it should, at the right level, and that the report shows every item |
+| [`sample-report/`](sample-report/) | The report for the test site, triaged, and how to make it again |
 
 ## What it catches
 

@@ -1,6 +1,6 @@
 # What the audit checks
 
-`duo-audit.mjs` opens each URL at the five viewports Safari 27.1 gives a page on iPhone Duo (`poses.json`, from WebKit), in Playwright's WebKit, with touch, a pixel ratio of 3 and Safari 27.1's iPhone user agent. It scrolls the whole page so lazy sections load, then measures. It reads inside iframes too, so a chat widget's own buttons count.
+`duo-audit.mjs` opens each URL at the five viewports Safari 27.1 gives a page on iPhone Duo (`poses.json`, from WebKit), in Playwright's WebKit, with touch, a pixel ratio of 3 and Safari 27.1's iPhone user agent. It scrolls the whole page so lazy sections load, then measures. It reads inside iframes too, so a chat widget's own buttons count. It runs with reduced motion on, so screenshots and comparisons hold still: animations stop wherever the page's reduced-motion styles leave them.
 
 **To fix** fails the run (exit 1). **To check** needs a person's judgement: it's often right, sometimes deliberate.
 
@@ -8,8 +8,10 @@
 
 | Check | Level | How it's measured | Threshold | Source |
 |---|---|---|---|---|
-| **Sideways scroll** (`sideways`) | To fix | The page's `scrollWidth` against the viewport width. Lists the elements reaching furthest past the right edge that nothing clips | 1px | Any pose that scrolls sideways is broken. Safari shrinks such a page to fit, which makes everything smaller |
+| **Sideways scroll** (`sideways`) | To fix | The page's `scrollWidth` against the viewport width, when neither `html` nor `body` clips sideways. Lists the elements reaching furthest past the right edge that nothing clips and that stick out of their parent, so children that only follow it (an icon's `svg`) aren't listed. An unnamed wrapper gives way to the named element inside it that makes it that wide | 1px | Any pose that scrolls sideways is broken. Safari shrinks such a page to fit, which makes everything smaller |
+| **Cut off at the edge** (`cutoff`) | To check | The same overflow, when `html` or `body` has `overflow-x: hidden` or `clip`. `scrollWidth` still counts it, but body's overflow reaches the viewport, so nobody can pan | 1px | Nothing scrolls, but whatever reaches past the edge is cut off. Often a deliberate bleed; check nothing readable or tappable is lost |
 | **Controls on the crease** (`crease`) | To fix | On "Open" (951 wide), every link, button, field and tab whose box straddles x = 475.5, the centre of the inner screen, including those inside iframes | Narrower than 240px; links inside a sentence don't count | Apple: buttons in the fold are hard to tap, so keep interactive elements out of it; scrolling content may cross. A row or card wider than 240px is content crossing, not a control, and so is a link inside running text, which can't move without reflowing the paragraph |
+| **Moving controls on the crease** (`crease-moving`) | To check | The same, for a control inside an element the CSS animates endlessly (`infinite`: a marquee, an autoplaying track), outside any reduced-motion query | As above | Moving, it crosses the fold like scrolling content, which Apple allows. Under reduced motion it stops where the audit measured it, possibly on the crease for good |
 | **Fixed controls on the crease, open tall** (`crease-h`) | To check | On "Open, tall", fixed or sticky controls straddling the horizontal crease. Scrolling content isn't checked: it passes over the line and moves on | Crosses the line | Same rule. The line's height inside Safari's page (y ≈ 426.5) is **estimated**, so this stays "to check" until it's measured in Safari |
 | **Fixed bars take too much** (`bars`) | To fix below 400px tall; to check otherwise | Fixed and sticky bars in the first screen (full-screen overlays aside), as a share of the height | 40% when the screen is under 400px tall ("Closed, wide" is 368); 50% elsewhere | Safari's own bars already take the rest. On a 368px screen a header plus a chat bubble can leave a third for the page |
 | **Fixed bars cover controls** (`covered`) | To fix | A control in the first screen with at least half its area under a fixed bar it isn't part of | Half the control | It can't be tapped |
@@ -19,11 +21,11 @@
 
 ## On the page's CSS
 
-The audit reads every inline `<style>` and linked stylesheet (cross-origin ones through Playwright, which isn't bound by CORS), and walks the rules with their surrounding `@media`.
+The audit reads every inline `<style>` and linked stylesheet (cross-origin ones through Playwright, which isn't bound by CORS), and walks the rules with their surrounding `@media`. It keeps only rules whose selector matches an element on the audited page (ignoring `:hover`, `:focus` and pseudo-elements), so a site-wide stylesheet doesn't report other pages' rules; the report counts the ones left out.
 
 | Check | Level | What it looks for | Why |
 |---|---|---|---|
-| **Heights in vh** (`vh`) | To check | `height`, `min-height` or `max-height` in `vh` with no `dvh`, `svh` or `lvh` in the same rule | With Safari's bars showing, `100vh` is the large height: 38px taller than what's visible on the closed screen (618 against 580). Full-height heroes push their buttons under the bars |
+| **Heights in vh** (`vh`) | To check | `height`, `min-height` or `max-height` in `vh` with no `dvh`, `svh` or `lvh` in the same rule | With Safari's bars showing, `100vh` is the large height: 38px taller than what's visible on the closed screen (618 against 580). Full-height heroes push their buttons under the bars. A `min-height` only matters when it's taller than the content: check the element's height at the open and closed sizes before changing it |
 | **Hover-only content** (`hover`) | To check | A rule that shows or hides something (`display`, `visibility`) on `:hover` of an ancestor, outside `@media (hover: hover)` | Every iPhone Duo pose is touch. A menu that opens on hover is unreachable or sticky |
 | **One edge's inset for both sides** (`insets`) | To check | `padding` or `margin` shorthand using `safe-area-inset-left` or `-right` without the other, or a right side set from the left inset | The closed screen's side insets differ (Safari's column is on one side). One value for both is wrong on one side |
 | **Header padded by the top inset** (`top-inset`) | To check | A header, nav or top bar with `padding-top` from `safe-area-inset-top` | In-app browsers (Instagram, LinkedIn) report a large top inset under their own toolbar, opening a dead strip above the nav (measured by duo-ready on iOS 26.5) |
@@ -50,4 +52,4 @@ A comparison counts as changed when three or more controls appear or disappear, 
 
 ## Self-test
 
-`test/broken.html` has one instance of every problem above. `test/fixed.html` is the same page done right. `node test/selftest.mjs` runs the audit on both and fails unless every problem is found on the first and nothing on the second. Run it after changing a check.
+The test pages are Margin, a made-up writing app. `test/broken.html` is its home page with one instance of every problem above, each marked `planted:`. `test/fixed.html` is the same page done right. `test/edge.html` holds the judgement calls (a clipped bleed, a marquee on the crease, an overlay, a fixed control on the horizontal crease, `cover` with no insets, a `vh` rule for an element that isn't there). `node test/selftest.mjs` runs the audit on all three and fails unless every problem is found on the first, nothing on the second, and on the third every judgement call as "to check" with nothing to fix. Run it after changing a check.

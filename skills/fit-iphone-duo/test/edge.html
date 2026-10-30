@@ -1,0 +1,121 @@
+<!doctype html>
+<!-- Self-test page: Margin's customers page, with the judgement calls duo-audit must report as "to check" and never
+     "to fix". Each is marked "judgement:" with the check it should trip, or "not reported:" when it must stay quiet.
+     Self-contained: no fonts, images or scripts from anywhere else, so the self-test runs offline. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">   <!-- judgement: cover, and no inset anywhere -->
+<meta name="color-scheme" content="light dark">
+<title>Customers · Margin</title>
+<style>
+  :root {
+    color-scheme: light dark;
+    --paper: light-dark(#faf8f3, #1c1b18); --surface: light-dark(#ffffff, #262521); --sunk: light-dark(#f2efe7, #161512);
+    --ink: light-dark(#18160f, #f4f1e8); --muted: light-dark(#65615a, #aaa59a); --line: light-dark(#e6e1d5, #36342e);
+    --accent: light-dark(#c2552d, #e07a52); --accent-soft: light-dark(#f7e5db, #43291d); --sage: light-dark(#4f6f58, #94b89c);
+    --serif: ui-serif, "Iowan Old Style", Charter, Georgia, serif;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, Helvetica, Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { background: var(--paper); }
+  body { margin: 0; font: 16px/1.55 var(--sans); color: var(--ink); -webkit-font-smoothing: antialiased; overflow-x: clip; }   /* judgement: cutoff, not sideways: nobody can pan */
+  a { color: inherit; }
+  .wrap { padding-left: 24px; padding-right: 24px; }
+
+  header { position: sticky; top: 0; z-index: 10; height: 60px;
+           background: color-mix(in srgb, var(--paper) 90%, transparent); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); border-bottom: 1px solid var(--line); }
+  .bar { height: 100%; max-width: 1080px; margin-inline: auto; display: flex; align-items: center; justify-content: space-between; }
+  .inner { max-width: 1080px; margin-inline: auto; }
+  .mark { display: inline-flex; align-items: center; gap: 10px; font: 600 21px/1 var(--serif); letter-spacing: -.01em; text-decoration: none; }
+  .mark i { width: 18px; height: 22px; border-radius: 3px; background: var(--surface); border: 1.5px solid var(--ink); box-shadow: inset 5px 0 0 -3.5px var(--accent); }
+  nav a { margin-left: 22px; font-size: 15px; color: var(--muted); text-decoration: none; }
+  nav a[aria-current] { color: var(--ink); font-weight: 600; }
+  @media (max-width: 599px) { nav a:not([aria-current]) { display: none; } }
+
+  .intro { padding-block: 64px 36px; }
+  .kicker { font: 600 12px/1 var(--sans); letter-spacing: .1em; text-transform: uppercase; color: var(--accent); margin: 0 0 14px; }
+  h1 { font: 500 clamp(36px, 6.4vw, 60px)/1.04 var(--serif); letter-spacing: -.025em; margin: 0 0 14px; max-width: 14ch; text-wrap: balance; }
+  .lede { color: var(--muted); font-size: clamp(16px, 2vw, 19px); max-width: 46ch; margin: 0; }
+
+  /* What's new runs off the right edge on purpose, to say there's more */
+  .release-strip { width: calc(100% + 48px); display: flex; gap: 10px; overflow: hidden; margin-top: 28px; }   /* judgement: cutoff, a deliberate bleed */
+  .release-strip span { flex: none; display: inline-flex; gap: 8px; align-items: baseline; padding: 9px 14px; border-radius: 999px; background: var(--surface);
+                        border: 1px solid var(--line); font-size: 14px; white-space: nowrap; }
+  .release-strip span b { font: 600 12px var(--sans); color: var(--sage); }
+
+  .logos { padding-block: 44px 56px; border-block: 1px solid var(--line); background: var(--sunk); margin-top: 48px; }
+  .logos p { text-align: center; margin: 0 0 22px; font: 600 12px/1 var(--sans); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+  .marquee { overflow: hidden; -webkit-mask: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); mask: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); }
+  .track { display: flex; gap: 32px; width: max-content; animation: slide 46s linear infinite; }                     /* judgement: crease-moving */
+  .track a { flex: none; width: 140px; height: 44px; display: grid; place-items: center; text-decoration: none; color: var(--muted); }
+  .track a:nth-child(6n+1) { font: 600 21px/1 var(--serif); letter-spacing: -.02em; }
+  .track a:nth-child(6n+2) { font: 700 15px/1 var(--sans); letter-spacing: .18em; text-transform: uppercase; }
+  .track a:nth-child(6n+3) { font: italic 500 23px/1 var(--serif); }
+  .track a:nth-child(6n+4) { font: 800 19px/1 var(--sans); letter-spacing: -.04em; }
+  .track a:nth-child(6n+5) { font: 500 17px/1 ui-monospace, Menlo, monospace; }
+  .track a:nth-child(6n+6) { font: 600 20px/1 var(--sans); letter-spacing: -.01em; }
+  @keyframes slide { to { transform: translateX(-50%); } }
+
+  .quotes { padding-block: 64px 96px; max-width: 1128px; margin-inline: auto; display: grid; gap: 18px; grid-template-columns: minmax(0, 1fr); }
+  @media (min-width: 600px) { .quotes { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .quotes figure { margin: 0; padding: 26px; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; }
+  .quotes blockquote { margin: 0 0 20px; font: 400 21px/1.35 var(--serif); letter-spacing: -.01em; }
+  .quotes figcaption { display: flex; align-items: center; gap: 12px; font-size: 14px; color: var(--muted); }
+  .quotes figcaption i { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; font: 600 13px var(--sans); font-style: normal; color: var(--paper); background: var(--sage); }
+  .quotes figure + figure figcaption i { background: var(--accent); }
+  .quotes figcaption b { display: block; color: var(--ink); font-weight: 600; }
+
+  footer.wrap { border-top: 1px solid var(--line); padding-block: 28px 64px; font-size: 14px; color: var(--muted); }
+  footer .bar { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; }
+
+  /* A film-grain layer over everything, for texture. It ignores taps */
+  .grain { position: fixed; inset: 0; z-index: 30; pointer-events: none; opacity: .07; mix-blend-mode: multiply;
+           background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }   /* judgement: overlay */
+  /* A feedback tab on the right edge, halfway down */
+  .feedback { position: fixed; right: 0; top: 50%; transform: translateY(-50%); z-index: 20; writing-mode: vertical-rl; padding: 16px 9px; border: 0;
+              border-radius: 10px 0 0 10px; background: var(--ink); color: var(--paper); font: 600 13px/1 var(--sans); letter-spacing: .02em; }   /* judgement: crease-h, across y 426.5 */
+
+  .signup-shell { min-height: 100vh; }   /* not reported: vh, the sign-up page's rule; nothing on this page uses it */
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; } }
+</style>
+</head>
+<body>
+<header class="wrap">
+  <div class="bar"><a class="mark" href="#top"><i></i>Margin</a>
+  <nav aria-label="Main"><a href="#product">Product</a><a href="#customers" aria-current="page">Customers</a><a href="#pricing">Pricing</a><a href="#signin">Sign in</a></nav></div>
+</header>
+<main id="top">
+  <section class="intro wrap"><div class="inner">
+    <p class="kicker">Customers</p>
+    <h1>Teams that write things down.</h1>
+    <p class="lede">1,200 product teams keep their decisions in Margin. Here's what changed for a few of them.</p>
+    <div class="release-strip" aria-label="Recent releases">
+      <span><b>3.0</b>Decision log</span><span><b>2.9</b>Review dates</span><span><b>2.8</b>Comments that close</span><span><b>2.7</b>Search that knows why</span><span><b>2.6</b>Templates</span>
+    </div>
+  </div></section>
+
+  <section class="logos" aria-label="Customers">
+    <p>Trusted by teams at</p>
+    <div class="marquee"><div class="track">
+      <a href="#halcyon">Halcyon</a><a href="#northbeam">Northbeam</a><a href="#ferro">Ferro</a><a href="#quarry">quarry</a><a href="#lumen">lumen/os</a><a href="#atlas">Atlas&amp;Co</a>
+      <a href="#halcyon" aria-hidden="true" tabindex="-1">Halcyon</a><a href="#northbeam" aria-hidden="true" tabindex="-1">Northbeam</a><a href="#ferro" aria-hidden="true" tabindex="-1">Ferro</a><a href="#quarry" aria-hidden="true" tabindex="-1">quarry</a><a href="#lumen" aria-hidden="true" tabindex="-1">lumen/os</a><a href="#atlas" aria-hidden="true" tabindex="-1">Atlas&amp;Co</a>
+    </div></div>
+  </section>
+
+  <section class="quotes wrap">
+    <figure>
+      <blockquote>"We stopped having the same meeting twice. That alone paid for it."</blockquote>
+      <figcaption><i>PR</i><span><b>Priya Raman</b>Head of Product, Halcyon</span></figcaption>
+    </figure>
+    <figure>
+      <blockquote>"New hires read the decision log in their first week. They ask better questions in their second."</blockquote>
+      <figcaption><i>JO</i><span><b>Jonas Okafor</b>Engineering Manager, Northbeam</span></figcaption>
+    </figure>
+  </section>
+</main>
+<footer class="wrap"><div class="bar"><a class="mark" href="#top"><i></i>Margin</a><span>© 2026 Margin Labs. Made for teams who write things down.</span></div></footer>
+<button class="feedback">Feedback</button>
+<div class="grain" aria-hidden="true"></div>
+</body>
+</html>
