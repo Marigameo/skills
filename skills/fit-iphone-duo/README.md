@@ -16,9 +16,11 @@ Then ask your coding agent to "make my site work on iPhone Duo". It starts at [S
 
 ## What the report looks like
 
-A [sample report](sample-report/) for two pages of the test site: the plan at the top, the levels, the five poses, then a card per item with the crease drawn and the element outlined.
+**[Open the sample report →](https://marigameo.github.io/iphone-duo-playground/report/)** It covers two pages of the test site: the plan at the top, the levels, the five poses, then a card per item with the crease drawn and the element outlined.
 
-[![The sample report: the plan, the level tiles, the five poses and the first card](sample-report/preview.jpg)](sample-report/)
+[![The sample report: the plan, the level tiles, the five poses and the first card](sample-report/preview.jpg)](https://marigameo.github.io/iphone-duo-playground/report/)
+
+Its source, with the triage and how to make it again, is in [`sample-report/`](sample-report/).
 
 ## What's inside
 

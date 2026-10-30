@@ -1,8 +1,8 @@
 # Sample report
 
-What the skill hands you: [`duo-report.html`](duo-report.html), for two pages of Margin, the made-up site in [`test/`](../test). [`broken.html`](../test/broken.html) has every problem the audit looks for, and [`edge.html`](../test/edge.html) holds the judgement calls. Open the HTML file in a browser; it needs nothing else.
+What the skill hands you: [`duo-report.html`](duo-report.html), for two pages of Margin, the made-up site in [`test/`](../test). [`broken.html`](../test/broken.html) has every problem the audit looks for, and [`edge.html`](../test/edge.html) holds the judgement calls. It's live at **[marigameo.github.io/iphone-duo-playground/report/](https://marigameo.github.io/iphone-duo-playground/report/)**, or open the HTML file here in a browser; it needs nothing else.
 
-[![The sample report: the plan, the level tiles, the five poses and the first card](preview.jpg)](duo-report.html)
+[![The sample report: the plan, the level tiles, the five poses and the first card](preview.jpg)](https://marigameo.github.io/iphone-duo-playground/report/)
 
 - `duo-report.html`: the report you read. A card per item, with an annotated screenshot where there's something to see, sorted into Needs you, My pick, Safe fix and Leave.
 - `duo-triage.json`: the agent's triage, a level and a fix for each item. It's what turns the audit's findings into the plan at the top.
@@ -17,4 +17,4 @@ node duo-audit.mjs http://localhost:4173/broken.html http://localhost:4173/edge.
 node duo-report.mjs sample-report     # after the triage is written
 ```
 
-The audit rewrites the findings and the pictures; `duo-triage.json` is left as it is.
+The audit rewrites the findings and the pictures; `duo-triage.json` is left as it is. Then copy the result to the live page, in the playground repo: `duo-report.html` to `report/index.html`, and `shots/` next to it.
