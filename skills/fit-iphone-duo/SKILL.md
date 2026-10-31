@@ -139,5 +139,4 @@ Unsure between two levels? Take the one that asks more of the owner.
 
 - Apple, [Designing for iPhone Duo](https://developer.apple.com/design/human-interface-guidelines/designing-for-iphone-duo), [Preparing your app for iPhone Duo](https://developer.apple.com/documentation/technologyoverviews/preparing-your-app-for-iphone-duo), and the four iPhone Duo Tech Talks: the crease rule, even columns, moving only what's necessary.
 - WebKit, [Features for Safari 27.1](https://webkit.org/blog/18486/webkit-features-for-safari-27-1/): the viewports, the flags, the background extension.
-- [duo-ready](https://github.com/gurovdigital/duo-ready) by Pavel Gurov: the first website skill for iPhone Duo, and the inspiration for the crease check and its 240px threshold. This skill differs in using Safari's measured viewports instead of the screen's size, in fixing causes in the code instead of adding a patch block, in checking behaviour (resizing, user agent, `screen.width`) and CSS as well as layout, and in auditing in WebKit.
 - [iphone-duo-skills](https://github.com/mirzaaghazadeh/iphone-duo-skills): the simulator measurements of Safari's side inset.
